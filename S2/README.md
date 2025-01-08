@@ -336,7 +336,160 @@
 
 ## 클래스
 
+- <b>클래스 문법</b>
+    - 객체를 정의하기 위한 상태(멤버 변수)와 메서드(함수)로 구성됨.
+    - 프로토타입 상속을 간결하게 만든 형태
+    - class와 extends, super()를 사용하면 상속과 메소드 호출이 직관적임.
+- <b>프로토타입(Prototype)</b>
+    - 자바스크립트에서 객체 지향적인 상속을 구현하는 핵심 개념
+    - 모든 자바스크립트 객체는 자신만의 프로토타입 객체를 가지고 있다는 특징을 가짐.
+    - 이 프로토타입 객체를 통해 상속 및 메소드 호출을 할 수 있음.
+    - `apply`, `Object.create()` 등으로 직접 구현해야 함.
+- 프로토타입 → 클래스
+    - `apply(this, arguments)`: 부모 생성자를 호출해 상속
+    - `Object.create(Human.prototype)`: 상속받은 메소드들을 참조하도록 설정
+    ```
+    function Human(name, age) {
+    this.name = name;
+    this.age = age;
+    }
+
+    Human.prototype.sayHello = function() {
+    console.log(`Hello, my name is ${this.name}.`);
+    };
+
+    function Zero(name, age, hobby) {
+    Human.apply(this, arguments);
+    this.hobby = hobby;
+    }
+
+    Zero.prototype = Object.create(Human.prototype);
+    Zero.prototype.constructor = Zero;
+
+    Zero.prototype.sayHobby = function() {
+    console.log(`My hobby is ${this.hobby}.`);
+    };
+    ```
+    - `super()`: 부모 클래스의 생성자 호출
+    - `extends`: 상속을 간단히 구현
+    ```
+    class Human {
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    sayHello() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+    }
+
+    class Zero extends Human {
+    constructor(name, age, hobby) {
+        super(name, age); // 부모 클래스 생성자 호출
+        this.hobby = hobby;
+    }
+
+    sayHobby() {
+        console.log(`My hobby is ${this.hobby}.`);
+    }
+    }
+
+    let zero = new Zero('Zero', 25, 'Reading');
+    zero.sayHello(); // "Hello, my name is Zero."
+    zero.sayHobby(); // "My hobby is Reading."
+    ```et zero = new Zero('Zero', 25, 'Reading');
+    zero.sayHello(); // "Hello, my name is Zero."
+    zero.sayHobby(); // "My hobby is Reading."
+    ```
+
+<details> 
+<summary> 함수 코드를 클래스 코드로 변환하는 문제 </summary>
+
 ![image](https://github.com/user-attachments/assets/4cd632a7-4189-4b45-a3aa-e2c40733d9f6)
+
+#### 클래스 코드
+```
+class Clock {
+  constructor({ template }) {
+    this.template = template;
+    this.timer = null;  
+  }
+
+  render() {
+    let date = new Date();
+
+    let hours = date.getHours();
+    if (hours < 10) hours = '0' + hours;
+
+    let mins = date.getMinutes();
+    if (mins < 10) mins = '0' + mins;
+
+    let secs = date.getSeconds();
+    if (secs < 10) secs = '0' + secs;
+
+    let output = this.template
+      .replace('h', hours)
+      .replace('m', mins)
+      .replace('s', secs);
+
+    console.log(output);
+  }
+
+  stop() {
+    clearInterval(this.timer);
+  }
+
+  start() {
+    this.render();
+    this.timer = setInterval(() => this.render(), 1000);
+  }
+}
+
+let clock = new Clock({ template: 'h:m:s' });
+clock.start();
+```
+
+#### 함수 기반
+```
+function Clock({ template }) {
+  let timer;
+
+  function render() {
+    let date = new Date();
+
+    let hours = date.getHours();
+    if (hours < 10) hours = '0' + hours;
+
+    let mins = date.getMinutes();
+    if (mins < 10) mins = '0' + mins;
+
+    let secs = date.getSeconds();
+    if (secs < 10) secs = '0' + secs;
+
+    let output = template
+      .replace('h', hours)
+      .replace('m', mins)
+      .replace('s', secs);
+
+    console.log(output);
+  }
+
+  this.stop = function() {
+    clearInterval(timer);
+  };
+
+  this.start = function() {
+    render();
+    timer = setInterval(render, 1000);
+  };
+}
+
+let clock = new Clock({ template: 'h:m:s' });
+clock.start();`
+```
+
+</details>
 
 ---
 
