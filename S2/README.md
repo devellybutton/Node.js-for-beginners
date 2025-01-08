@@ -1,5 +1,15 @@
 # 섹션2. 알아두어야 할 자바스크립트
 
+자바스크립트에서 가장 중요한 것
+
+1. 실행 컨텍스트 (this, scope)
+2. 이벤트 루프
+3. 프로토타입
+4. 최신 문법들 <br>
+   => 별도로 공부하는게 좋을 듯
+
+---
+
 > - [호출 스택](#호출-스택)
 > - [이벤트 루프](#이벤트-루프)
 > - [var, const, let](#var-const-let)
@@ -153,178 +163,203 @@
 ---
 
 ## 템플릿 문자열, 객체 리터럴
+
 ### 1) 템플릿 문자열 (Template Literals)
+
 - 백틱 (`)을 사용하여 문자열을 정의하고, ${}로 변수나 표현식을 문자열 안에 쉽게 삽입
-    ```
-    // 기존 방식 (띄어쓰기가 불편)
-    var won = 1000;
-    var result = '이 과자는' + won + '원입니다.';
-    console.log(result);  // 출력: 이 과자는1000원입니다. (띄어쓰기 불편)
 
-    // 템플릿 문자열 (백틱 사용)
-    const result = `이 과자는 ${won}원입니다.`;
-    console.log(result);  // 출력: 이 과자는 1000원입니다. (띄어쓰기가 자동으로 해결됨)
-    ```
+  ```
+  // 기존 방식 (띄어쓰기가 불편)
+  var won = 1000;
+  var result = '이 과자는' + won + '원입니다.';
+  console.log(result);  // 출력: 이 과자는1000원입니다. (띄어쓰기 불편)
+
+  // 템플릿 문자열 (백틱 사용)
+  const result = `이 과자는 ${won}원입니다.`;
+  console.log(result);  // 출력: 이 과자는 1000원입니다. (띄어쓰기가 자동으로 해결됨)
+  ```
+
 ### 2) 객체 리터럴 (Object Literals)
+
 - 함수 정의 간소화
-    ```
-    const calculator = {
-        num1: 5,
-        num2: 3,
-        
-        // 기존 방식: 함수 표현식
-        add: function() {
-            return this.num1 + this.num2;
-        },
-        
-        // 축약된 방식: 함수 정의 간소화
-        subtract() {
-            return this.num1 - this.num2;
-        }
-    };
 
-    console.log(calculator.add());       // 출력: 8
-    console.log(calculator.subtract());  // 출력: 2
-    ```
+  ```
+  const calculator = {
+      num1: 5,
+      num2: 3,
+
+      // 기존 방식: 함수 표현식
+      add: function() {
+          return this.num1 + this.num2;
+      },
+
+      // 축약된 방식: 함수 정의 간소화
+      subtract() {
+          return this.num1 - this.num2;
+      }
+  };
+
+  console.log(calculator.add());       // 출력: 8
+  console.log(calculator.subtract());  // 출력: 2
+  ```
+
 - 속성 이름 축약 (속성 이름이 변수 이름과 같을 때)
-    ```
-    const name = "Alice";
-    const age = 25;
 
-    // 속성 이름 축약 전
-    const person1 = {
-        name: name,
-        age: age
-    };
-    console.log(person1);  // 출력: { name: 'Alice', age: 25 }
+  ```
+  const name = "Alice";
+  const age = 25;
 
-    // 속성 이름 축약 후
-    const person2 = { name, age };
-    console.log(person2);  // 출력: { name: 'Alice', age: 25 }
-    ```
+  // 속성 이름 축약 전
+  const person1 = {
+      name: name,
+      age: age
+  };
+  console.log(person1);  // 출력: { name: 'Alice', age: 25 }
+
+  // 속성 이름 축약 후
+  const person2 = { name, age };
+  console.log(person2);  // 출력: { name: 'Alice', age: 25 }
+  ```
 
 ### 3) 태그드 템플릿 리터럴 (Tagged Template Literals)
--  템플릿 문자열에 함수를 태그로 사용하여, 템플릿 문자열을 다르게 처리할 수 있는 기능
-    - 예시 1
-        ```
-        // 템플릿 문자열을 처리하는 함수
-        function tag(strings, ...values) {
-            console.log(strings);  // 템플릿 문자열의 고정된 부분 (배열로 받음)
-            console.log(values);   // 템플릿 문자열 내에서 평가된 값 (배열로 받음)
-            return "처리된 템플릿";
-        }
 
-        const name = "홍길동";
-        const age = 29;
+- 템플릿 문자열에 함수를 태그로 사용하여, 템플릿 문자열을 다르게 처리할 수 있는 기능
 
-        // tag 함수로 템플릿 문자열을 전달
-        const result = tag`이름은 ${name}이고, 나이는 ${age}입니다.`;
-        console.log(result);  // 출력: 처리된 템플릿
-        ```
-    - 예시 2: HTML 생성하기
-        ```
-        function safeHTML(strings, ...values) {
-            return strings.reduce((result, str, index) => {
-                let value = values[index - 1];
+  - 예시 1
 
-                if (typeof value === 'string') {
-                    // 특수 문자 이스케이프 처리 (XSS 방지)
-                    value = value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                }
-                return result + str + (value || '');
-            });
-        }
+    ```
+    // 템플릿 문자열을 처리하는 함수
+    function tag(strings, ...values) {
+        console.log(strings);  // 템플릿 문자열의 고정된 부분 (배열로 받음)
+        console.log(values);   // 템플릿 문자열 내에서 평가된 값 (배열로 받음)
+        return "처리된 템플릿";
+    }
 
-        const name = "<script>alert('XSS')</script>";
-        const message = "Hello, world!";
+    const name = "홍길동";
+    const age = 29;
 
-        // `safeHTML` 함수 사용
-        const result = safeHTML`안녕하세요, ${name}님! ${message}`;
-        console.log(result);  // 출력: 안녕하세요, &lt;script&gt;alert('XSS')&lt;/script&gt;님! Hello, world!
-        ```
+    // tag 함수로 템플릿 문자열을 전달
+    const result = tag`이름은 ${name}이고, 나이는 ${age}입니다.`;
+    console.log(result);  // 출력: 처리된 템플릿
+    ```
+
+  - 예시 2: HTML 생성하기
+
+    ```
+    function safeHTML(strings, ...values) {
+        return strings.reduce((result, str, index) => {
+            let value = values[index - 1];
+
+            if (typeof value === 'string') {
+                // 특수 문자 이스케이프 처리 (XSS 방지)
+                value = value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+            return result + str + (value || '');
+        });
+    }
+
+    const name = "<script>alert('XSS')</script>";
+    const message = "Hello, world!";
+
+    // `safeHTML` 함수 사용
+    const result = safeHTML`안녕하세요, ${name}님! ${message}`;
+    console.log(result);  // 출력: 안녕하세요, &lt;script&gt;alert('XSS')&lt;/script&gt;님! Hello, world!
+    ```
 
 ---
 
 ## 화살표 함수
+
 - 화살표 함수는 function을 완벽하게 대체할 수 없음.
 
 ### 1) 화살표 함수 문법
+
 - 기본형
-    - 단일 표현식 반환할 때 return을 쓰지 않아도 됨.
-    ```
-    const add = (a, b) => a + b;
-    ```
+  - 단일 표현식 반환할 때 return을 쓰지 않아도 됨.
+  ```
+  const add = (a, b) => a + b;
+  ```
 - 본문이 여러 줄일 경우
-    -  중괄호 {}와 return 명시적 사용
-    ```
-    const calc = (a, b) => {
-        const result = a + b;
-        return result;
-    };
-    ```
+  - 중괄호 {}와 return 명시적 사용
+  ```
+  const calc = (a, b) => {
+      const result = a + b;
+      return result;
+  };
+  ```
 - 객체 반환시 소괄호 필수
-    - 안 써주면 객체인지 함수 body인지 자바스크립트가 헷갈림
-    ```
-    const makeObj = (x, y) => ({ x, y });  // 올바른 방법
-    const makeObj2 = (x, y) => { x, y };   // 잘못된 방법 (undefined 반환)
-    ```
+  - 안 써주면 객체인지 함수 body인지 자바스크립트가 헷갈림
+  ```
+  const makeObj = (x, y) => ({ x, y });  // 올바른 방법
+  const makeObj2 = (x, y) => { x, y };   // 잘못된 방법 (undefined 반환)
+  ```
 
 ### 2) 화살표 함수 vs 일반 함수
-| 특징         | 화살표 함수 (Arrow Function)          | 일반 함수 (Function)               |
-|--------------|--------------------------------------|-----------------------------------|
-| **this**     | 부모 스코프의 `this`를 참조           | 호출 시 결정된 `this`를 참조      |
-| **arguments**| 없음                                 | 있음                              |
-| **constructor** | 사용할 수 없음                    | 사용할 수 있음 (생성자 함수)      |
-| **prototype** | 없음                                 | 있음                              |
-| **super**    | 사용할 수 없음                       | 사용할 수 있음 (클래스 상속 시)    |
-| **new.target** | 없음                               | 사용할 수 있음                    |
+
+| 특징            | 화살표 함수 (Arrow Function) | 일반 함수 (Function)            |
+| --------------- | ---------------------------- | ------------------------------- |
+| **this**        | 부모 스코프의 `this`를 참조  | 호출 시 결정된 `this`를 참조    |
+| **arguments**   | 없음                         | 있음                            |
+| **constructor** | 사용할 수 없음               | 사용할 수 있음 (생성자 함수)    |
+| **prototype**   | 없음                         | 있음                            |
+| **super**       | 사용할 수 없음               | 사용할 수 있음 (클래스 상속 시) |
+| **new.target**  | 없음                         | 사용할 수 있음                  |
 
 ---
 
 ## 구조분해 할당
 
 ### 1) 배열에서의 구조분해 할당
+
 - 기존 문법 사용
-    ```
-    const example = { a: 123, b: { c: 135, d: 146 } };
 
-    const a = example.a;
-    const d = example.b.d;
+  ```
+  const example = { a: 123, b: { c: 135, d: 146 } };
 
-    console.log(a); // 123
-    console.log(d); // 146
-    ```
+  const a = example.a;
+  const d = example.b.d;
+
+  console.log(a); // 123
+  console.log(d); // 146
+  ```
+
 - 구조 분해 할당 문법 사용
-    - 객체에서의 순서와 무관하게 키 이름만 맞으면 값이 추출됨.
-    ```
-    const { a, b: { d } } = example;
 
-    console.log(a); // 123
-    console.log(d); // 146
-    ```
+  - 객체에서의 순서와 무관하게 키 이름만 맞으면 값이 추출됨.
+
+  ```
+  const { a, b: { d } } = example;
+
+  console.log(a); // 123
+  console.log(d); // 146
+  ```
 
 ### 2) 객체에서의 구조분해 할당
+
 - 기존 문법 사용
-    ```
-    const arr = [1, 2, 3, 4, 5];
 
-    // 기존 방법으로 값 추출
-    const x = arr[0];
-    const y = arr[1];
-    const z = arr[4];
+  ```
+  const arr = [1, 2, 3, 4, 5];
 
-    console.log(x); // 1
-    console.log(y); // 2
-    console.log(z); // 5
-    ```
+  // 기존 방법으로 값 추출
+  const x = arr[0];
+  const y = arr[1];
+  const z = arr[4];
+
+  console.log(x); // 1
+  console.log(y); // 2
+  console.log(z); // 5
+  ```
+
 - 구조분해 할당 사용
-    ```
-    const [x, y, , , z] = arr;
 
-    console.log(x); // 1
-    console.log(y); // 2
-    console.log(z); // 5
-    ```
+  ```
+  const [x, y, , , z] = arr;
+
+  console.log(x); // 1
+  console.log(y); // 2
+  console.log(z); // 5
+  ```
 
 ### 요약
 
@@ -337,71 +372,75 @@
 ## 클래스
 
 - <b>클래스 문법</b>
-    - 객체를 정의하기 위한 상태(멤버 변수)와 메서드(함수)로 구성됨.
-    - 프로토타입 상속을 간결하게 만든 형태
-    - class와 extends, super()를 사용하면 상속과 메소드 호출이 직관적임.
+  - 객체를 정의하기 위한 상태(멤버 변수)와 메서드(함수)로 구성됨.
+  - 프로토타입 상속을 간결하게 만든 형태
+  - class와 extends, super()를 사용하면 상속과 메소드 호출이 직관적임.
 - <b>프로토타입(Prototype)</b>
-    - 자바스크립트에서 객체 지향적인 상속을 구현하는 핵심 개념
-    - 모든 자바스크립트 객체는 자신만의 프로토타입 객체를 가지고 있다는 특징을 가짐.
-    - 이 프로토타입 객체를 통해 상속 및 메소드 호출을 할 수 있음.
-    - `apply`, `Object.create()` 등으로 직접 구현해야 함.
+  - 자바스크립트에서 객체 지향적인 상속을 구현하는 핵심 개념
+  - 모든 자바스크립트 객체는 자신만의 프로토타입 객체를 가지고 있다는 특징을 가짐.
+  - 이 프로토타입 객체를 통해 상속 및 메소드 호출을 할 수 있음.
+  - `apply`, `Object.create()` 등으로 직접 구현해야 함.
 - 프로토타입 → 클래스
-    - `apply(this, arguments)`: 부모 생성자를 호출해 상속
-    - `Object.create(Human.prototype)`: 상속받은 메소드들을 참조하도록 설정
-    ```
-    function Human(name, age) {
-    this.name = name;
-    this.age = age;
-    }
 
-    Human.prototype.sayHello = function() {
-    console.log(`Hello, my name is ${this.name}.`);
-    };
+  - `apply(this, arguments)`: 부모 생성자를 호출해 상속
+  - `Object.create(Human.prototype)`: 상속받은 메소드들을 참조하도록 설정
 
-    function Zero(name, age, hobby) {
-    Human.apply(this, arguments);
-    this.hobby = hobby;
-    }
+  ```
+  function Human(name, age) {
+  this.name = name;
+  this.age = age;
+  }
 
-    Zero.prototype = Object.create(Human.prototype);
-    Zero.prototype.constructor = Zero;
+  Human.prototype.sayHello = function() {
+  console.log(`Hello, my name is ${this.name}.`);
+  };
 
-    Zero.prototype.sayHobby = function() {
-    console.log(`My hobby is ${this.hobby}.`);
-    };
-    ```
-    - `super()`: 부모 클래스의 생성자 호출
-    - `extends`: 상속을 간단히 구현
-    ```
-    class Human {
-    constructor(name, age) {
-        this.name = name;
-        this.age = age;
-    }
+  function Zero(name, age, hobby) {
+  Human.apply(this, arguments);
+  this.hobby = hobby;
+  }
 
-    sayHello() {
-        console.log(`Hello, my name is ${this.name}.`);
-    }
-    }
+  Zero.prototype = Object.create(Human.prototype);
+  Zero.prototype.constructor = Zero;
 
-    class Zero extends Human {
-    constructor(name, age, hobby) {
-        super(name, age); // 부모 클래스 생성자 호출
-        this.hobby = hobby;
-    }
+  Zero.prototype.sayHobby = function() {
+  console.log(`My hobby is ${this.hobby}.`);
+  };
+  ```
 
-    sayHobby() {
-        console.log(`My hobby is ${this.hobby}.`);
-    }
-    }
+  - `super()`: 부모 클래스의 생성자 호출
+  - `extends`: 상속을 간단히 구현
 
-    let zero = new Zero('Zero', 25, 'Reading');
-    zero.sayHello(); // "Hello, my name is Zero."
-    zero.sayHobby(); // "My hobby is Reading."
-    ```et zero = new Zero('Zero', 25, 'Reading');
-    zero.sayHello(); // "Hello, my name is Zero."
-    zero.sayHobby(); // "My hobby is Reading."
-    ```
+  ````
+  class Human {
+  constructor(name, age) {
+      this.name = name;
+      this.age = age;
+  }
+
+  sayHello() {
+      console.log(`Hello, my name is ${this.name}.`);
+  }
+  }
+
+  class Zero extends Human {
+  constructor(name, age, hobby) {
+      super(name, age); // 부모 클래스 생성자 호출
+      this.hobby = hobby;
+  }
+
+  sayHobby() {
+      console.log(`My hobby is ${this.hobby}.`);
+  }
+  }
+
+  let zero = new Zero('Zero', 25, 'Reading');
+  zero.sayHello(); // "Hello, my name is Zero."
+  zero.sayHobby(); // "My hobby is Reading."
+  ```et zero = new Zero('Zero', 25, 'Reading');
+  zero.sayHello(); // "Hello, my name is Zero."
+  zero.sayHobby(); // "My hobby is Reading."
+  ````
 
 <details> 
 <summary> 함수 코드를 클래스 코드로 변환하는 문제 </summary>
@@ -409,11 +448,12 @@
 ![image](https://github.com/user-attachments/assets/4cd632a7-4189-4b45-a3aa-e2c40733d9f6)
 
 #### 클래스 코드
+
 ```
 class Clock {
   constructor({ template }) {
     this.template = template;
-    this.timer = null;  
+    this.timer = null;
   }
 
   render() {
@@ -451,6 +491,7 @@ clock.start();
 ```
 
 #### 함수 기반
+
 ```
 function Clock({ template }) {
   let timer;
@@ -496,228 +537,252 @@ clock.start();`
 ## Promise, async/await
 
 ### 1) Callback
+
 - JavaScript에서 비동기 함수는 실행 순서를 보장할 수 없음.
 - 따라서 비동기 함수 내에서 콜백 함수를 받아 순차적으로 실행하도록 구현함.
 - 콜백 함수가 여러 번 중첩되면 <b>콜백 헬(callback hell)</b>에 빠져 코드의 가독성이 떨어지고, 유지보수가 어려워짐.
-    ```
-    processNumber(1, (index) => {
-        processNumber(index, (index) => {
-            processNumber(index, (index) => {
-                processNumber(index, (index) => {
-                    processNumber(index, (index) => {
-                        console.log('index: ', index);
-                        console.log('this is test !!!!!!!!!!!!');
-                    });
-                });
-            });
-        });
-    });
-    ```
+  ```
+  processNumber(1, (index) => {
+      processNumber(index, (index) => {
+          processNumber(index, (index) => {
+              processNumber(index, (index) => {
+                  processNumber(index, (index) => {
+                      console.log('index: ', index);
+                      console.log('this is test !!!!!!!!!!!!');
+                  });
+              });
+          });
+      });
+  });
+  ```
 
-### 2) Promise 
+### 2) Promise
+
 - Promise는 비동기 작업을 나타내는 객체로, 해당 작업이 <b>실행되었지만 아직 결과를 반환하지 않은 상태</b>를 의미함.
-    - `resolve`: 비동기 작업이 <b>성공적으로</b> 끝났을 때 호출됨.
-    - `reject`: 비동기 작업이 <b>실패했을 때</b> 호출됨.
+  - `resolve`: 비동기 작업이 <b>성공적으로</b> 끝났을 때 호출됨.
+  - `reject`: 비동기 작업이 <b>실패했을 때</b> 호출됨.
 
 ### 3) Promise - then, catch
-- `then`: 
-    - Promise가 성공적으로 끝났을 때(resolve) 호출됨. 
-    - 반환값을 사용해 후속 작업을 처리할 수 있음.
+
+- `then`:
+  - Promise가 성공적으로 끝났을 때(resolve) 호출됨.
+  - 반환값을 사용해 후속 작업을 처리할 수 있음.
 - `catch`:
-    - Promise가 거부(reject)되었을 때 호출됨.
-    - 에러를 처리함.
+  - Promise가 거부(reject)되었을 때 호출됨.
+  - 에러를 처리함.
 - <b>Promise의 세 가지 상태</b>
-    - `pending`: 대기 상태, 아직 결과가 나오지 않음
-    - `fulfilled`: 비동기 작업이 성공적으로 완료된 상태
-    - `rejected`: 비동기 작업이 실패한 상태
+  - `pending`: 대기 상태, 아직 결과가 나오지 않음
+  - `fulfilled`: 비동기 작업이 성공적으로 완료된 상태
+  - `rejected`: 비동기 작업이 실패한 상태
 - then 체이닝: 여러 개의 비동기 작업을 순차적으로 연결하여 처리할 수 있음.
-    ```
-    fetchData()
-    .then(result => {
-        console.log('First step: ', result);
-        return process(result);
-    })
-    .then(processedResult => {
-        console.log('Second step: ', processedResult);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-    ```
+  ```
+  fetchData()
+  .then(result => {
+      console.log('First step: ', result);
+      return process(result);
+  })
+  .then(processedResult => {
+      console.log('Second step: ', processedResult);
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+  ```
 
 ### 4) Promise - async, await
+
 - `async 함수`
-    - async 함수는 항상 Promise를 반환함.
-    - await를 사용할 수 있게 해줌.
+  - async 함수는 항상 Promise를 반환함.
+  - await를 사용할 수 있게 해줌.
 - `await`
-    - await는 Promise가 해결될 때까지 기다린 후 결과를 반환 
-    - await는 async 함수 내에서만 사용할 수 있음.
+  - await는 Promise가 해결될 때까지 기다린 후 결과를 반환
+  - await는 async 함수 내에서만 사용할 수 있음.
 - async/await의 장점
-    - 비동기 코드가 동기 코드처럼 작성되어 가독성이 좋아짐.
-    - Promise를 .then() 체이닝 없이 순차적으로 처리할 수 있음.
-    ```
-    // 기본적인 사용
-    async function main() {
-    const result = await promise;
-    return result;
-    }
 
-    main().then((name) => {
-    console.log(name);
-    });
+  - 비동기 코드가 동기 코드처럼 작성되어 가독성이 좋아짐.
+  - Promise를 .then() 체이닝 없이 순차적으로 처리할 수 있음.
 
-    // 에러 처리
-    async function main() {
-    try {
-        const result = await promise;
-        return result;
-    } catch (error) {
-        console.error(error);
-    }
-    }
-    ```
+  ```
+  // 기본적인 사용
+  async function main() {
+  const result = await promise;
+  return result;
+  }
+
+  main().then((name) => {
+  console.log(name);
+  });
+
+  // 에러 처리
+  async function main() {
+  try {
+      const result = await promise;
+      return result;
+  } catch (error) {
+      console.error(error);
+  }
+  }
+  ```
+
 #### top level await
+
 ![image](https://github.com/user-attachments/assets/96fe489d-798d-42d9-904b-e9613284e383)
+
 - Top-level await는 ES2022에서 도입된 기능으로, 이전까지는 await를 사용하기 위해서는 반드시 async 함수 내부에서만 사용해야 했으나, 이제는 모듈 환경에서 async 함수 없이도 await를 직접 사용할 수 있게 됨.
 - 초기화 코드를 IIFE(즉시 실행 함수)나 별도의 초기화 함수로 감싸야 했지만, Top-level await를 사용하면 더 깔끔하게 처리할 수 있게 됨.
 
 - 브라우저
-    ```
-    // 반드시 모듈 환경이어야 함
-    // HTML에서는 다음과 같이 사용
-    <script type="module">
-    const data = await fetch('/api/data');
-    </script>
 
-    // 또는 .mjs 파일에서 사용
-    ```
-    ```
-    // 모듈에서 데이터를 가져올 때
-    const response = await fetch('https://api.example.com/data');
-    const data = await response.json();
-    export { data };
+  ```
+  // 반드시 모듈 환경이어야 함
+  // HTML에서는 다음과 같이 사용
+  <script type="module">
+  const data = await fetch('/api/data');
+  </script>
 
-    // 동적으로 모듈을 불러올 때
-    const module = await import('./module.js');
-    ```
-    ```
-    // 이전 방식 (async 함수 필요)
-    (async function() {
-    const data = await fetchData();
-    console.log(data);
-    })();
+  // 또는 .mjs 파일에서 사용
+  ```
 
-    // Top-level await 사용
-    const data = await fetchData();
-    console.log(data);
-    ```
+  ```
+  // 모듈에서 데이터를 가져올 때
+  const response = await fetch('https://api.example.com/data');
+  const data = await response.json();
+  export { data };
+
+  // 동적으로 모듈을 불러올 때
+  const module = await import('./module.js');
+  ```
+
+  ```
+  // 이전 방식 (async 함수 필요)
+  (async function() {
+  const data = await fetchData();
+  console.log(data);
+  })();
+
+  // Top-level await 사용
+  const data = await fetchData();
+  console.log(data);
+  ```
+
 - Node.js 환경
-    ```
-    // package.json에서 모듈 타입 설정
-    {
-    "type": "module"
-    }
 
-    // 또는 파일 확장자를 .mjs로 사용
-    ```
-    ```
-    // 에러 처리 예시
-    try {
-    const connection = await database.connect();
-    export default connection;
-    } catch (err) {
-    console.error('Failed to connect to database:', err);
-    process.exit(1);
-    }
-    ```
+  ```
+  // package.json에서 모듈 타입 설정
+  {
+  "type": "module"
+  }
 
-### Promise 예시 
+  // 또는 파일 확장자를 .mjs로 사용
+  ```
+
+  ```
+  // 에러 처리 예시
+  try {
+  const connection = await database.connect();
+  export default connection;
+  } catch (err) {
+  console.error('Failed to connect to database:', err);
+  process.exit(1);
+  }
+  ```
+
+### Promise 예시
+
 - 함수의 매개변수로 숫자를 받으면 3초 후에 입력한 숫자를 반환하는 promise 함수 만들기
-    ```
-    function getPromise(number) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {resolve(number)}, 3000)
-        });
-    }
-    ```
+  ```
+  function getPromise(number) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {resolve(number)}, 3000)
+      });
+  }
+  ```
 - .then()과 .catch() 사용
-    ```
-    getPromise(5).then(result => {
-        console.log(result);  // 3초 후에 5가 출력
-    }).catch(error => {
-        console.error(error);
-    });
-    ```
+  ```
+  getPromise(5).then(result => {
+      console.log(result);  // 3초 후에 5가 출력
+  }).catch(error => {
+      console.error(error);
+  });
+  ```
 - async/await 사용
-    ```
-    async function testPromise() {
-        try {
-            const result = await getPromise(5);
-            console.log(result);  // 3초 후에 5가 출력
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
-    testPromise();
-    ```
+  ```
+  async function testPromise() {
+      try {
+          const result = await getPromise(5);
+          console.log(result);  // 3초 후에 5가 출력
+      } catch (error) {
+          console.error(error);
+      }
+  }
+
+  testPromise();
+  ```
+
 - 그냥 `console.log(getPromise(5))`출력하면 `Promise { <pending> }`으로 나옴.
-    - Promise 객체가 아직 "완료되지 않은 상태(pending)"에 있기 때문
+  - Promise 객체가 아직 "완료되지 않은 상태(pending)"에 있기 때문
 
 ### Promise all / Promise.allSettled 예시
+
 - 문제
-    - 함수의 매개변수로 몇 밀리초(ms) 후에 실행될지를 입력받습니다.
-    - 주어진 시간(ms)이 경과한 후, setTimeout을 사용하여 "${ms}ms work !!!" 메시지를 출력하고, 해당 ms 값을 반환하는 Promise 함수를 작성하세요.
-    - 이 함수를 사용하여 1초, 3초, 5초 후에 실행되도록 각각 Promise를 생성하고, Promise.all()을 사용해 동시에 실행되도록 하세요.
-    - Promise.all([promise1, promise2, promise3]) 형태로 실행하여 각 작업이 완료될 때의 결과를 출력하도록 합니다.
+  - 함수의 매개변수로 몇 밀리초(ms) 후에 실행될지를 입력받습니다.
+  - 주어진 시간(ms)이 경과한 후, setTimeout을 사용하여 "${ms}ms work !!!" 메시지를 출력하고, 해당 ms 값을 반환하는 Promise 함수를 작성하세요.
+  - 이 함수를 사용하여 1초, 3초, 5초 후에 실행되도록 각각 Promise를 생성하고, Promise.all()을 사용해 동시에 실행되도록 하세요.
+  - Promise.all([promise1, promise2, promise3]) 형태로 실행하여 각 작업이 완료될 때의 결과를 출력하도록 합니다.
 - <b>Promise.all</b>
-    - 주어진 모든 Promise가 성공적으로 완료될 때만 결과를 반환하며, 하나라도 실패하면 즉시 catch로 이동
-    ```
-    function getPromise(time) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                console.log(`${time}ms work !!!`);
-                resolve(time);  // time 값 반환
-            }, time);
-        });
-    }
 
-    Promise.all([getPromise(1000), getPromise(3000), getPromise(5000)])
-        .then(results => {
-            console.log(results);  // [1000, 3000, 5000] 출력
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    ```
+  - 주어진 모든 Promise가 성공적으로 완료될 때만 결과를 반환하며, 하나라도 실패하면 즉시 catch로 이동
+
+  ```
+  function getPromise(time) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              console.log(`${time}ms work !!!`);
+              resolve(time);  // time 값 반환
+          }, time);
+      });
+  }
+
+  Promise.all([getPromise(1000), getPromise(3000), getPromise(5000)])
+      .then(results => {
+          console.log(results);  // [1000, 3000, 5000] 출력
+      })
+      .catch(error => {
+          console.error(error);
+      });
+  ```
+
 - <b>Promise.allSettled</b>
-    - 주어진 모든 Promise가 <b>완료(성공 또는 실패)</b>될 때까지 기다린 후, 각 Promise의 상태와 결과를 반환
-    ```
-    function getPromise(time, shouldReject = false) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (shouldReject) {
-                    reject(`Error after ${time}ms`);
-                } else {
-                    console.log(`${time}ms work !!!`);
-                    resolve(time);
-                }
-            }, time);
-        });
-    }
 
-    Promise.allSettled([
-        getPromise(1000),            // 성공
-        getPromise(3000, true),      // 실패
-        getPromise(5000)             // 성공
-    ])
-    .then(results => {
-        console.log('All promises settled:', results);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-    ```
+  - 주어진 모든 Promise가 <b>완료(성공 또는 실패)</b>될 때까지 기다린 후, 각 Promise의 상태와 결과를 반환
+
+  ```
+  function getPromise(time, shouldReject = false) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              if (shouldReject) {
+                  reject(`Error after ${time}ms`);
+              } else {
+                  console.log(`${time}ms work !!!`);
+                  resolve(time);
+              }
+          }, time);
+      });
+  }
+
+  Promise.allSettled([
+      getPromise(1000),            // 성공
+      getPromise(3000, true),      // 실패
+      getPromise(5000)             // 성공
+  ])
+  .then(results => {
+      console.log('All promises settled:', results);
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+  ```
 
 ---
 
@@ -1035,15 +1100,15 @@ for (const value of Object.values(obj)) {
 
 - <b>XMLHttpRequest</b>
   ![image](https://github.com/user-attachments/assets/f7eb9180-b8b7-4967-97c3-c82ac7cee571)
-  `    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log(JSON.parse(xhr.responseText));
-        }
-    };
-    xhr.open('GET', 'https://api.example.com/data', true);
-    xhr.send();
-   `
+  `   const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log(JSON.parse(xhr.responseText));
+      }
+  };
+  xhr.open('GET', 'https://api.example.com/data', true);
+  xhr.send();
+`
 
 - <b>Fetch API</b>
 
