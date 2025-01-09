@@ -55,7 +55,68 @@
 
 ## fs로 HTML파일 읽어 제공하기
 
+### HTTP 모듈과 Express의 응답 처리 차이
+- `res.write()` : 클라이언트에게 데이터를 전송하는 메서드
+    - `res.write('<h1>Hello Node!</h1>')`
+    - 사파리 같은 브라우저는 이게 문자열인지 html코드인지 구별을 못함
+- `res.writeHead()` : 응답의 상태코드와 헤더를 설정
+    - `res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });`
+    - http 모듈에서는 응답의 상태 코드와 헤더를 명시적으로 설정해줘야함.
+    - express는 자동으로 처리해 주기 때문에 writeHead가 필요 없지만, http 모듈에서는 반드시 설정해야함.
+        - res.send('Hello')를 사용하면 상태코드와 헤더를 알아서 설정함.
+            - 상태 코드: 200 OK (성공)
+            - Content-Type: text/html; charset=utf-8 (HTML 콘텐츠)
+- `res.end()` : 호출하지 않으면 pending 상태로 끝나게 됨.
 
+### 서버 두 개를 동시에 실행하기
+- 하지만 서버 두 개를 동시에 돌릴 필요는 없음. 
+- 단일 프로세스에서도 동시에 여러 요청을 처리할 수 있기 때문임.
+
+<details>
+<summary>서버 두 개 만들어서 동시에 실행하기</summary>
+
+```
+const http = require("http");
+const fs = requrie("fs");
+
+const server = http
+  .createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.write("<h1>Hello Node!</h1>");
+    res.write("<p>Hello server</p>");
+    res.end("<p>Hello Zerocho</p>");
+  })
+  .listen(8080);
+server.on("listening", () => {
+  console.log(`8080번 포트에서 서버 대기 중입니다.`);
+});
+server.on("error", (error) => {
+  console.error(error);
+});
+
+const server1 = http
+  .createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.write("<h1>Hello Node!</h1>");
+    res.write("<p>Hello server</p>");
+    res.end("<p>Hello Zerocho</p>");
+  })
+  .listen(8081);
+server.on("listening", () => {
+  console.log(`8081번 포트에서 서버 대기 중입니다.`);
+});
+```
+
+![image](https://github.com/user-attachments/assets/55838522-c763-4ea0-9141-84d42758cd1b)
+
+</details>
+
+<details>
+<summary>server1.js 실행 결과</summary>
+
+![image](https://github.com/user-attachments/assets/4a5dff24-220b-42d0-8d1c-278736c89e5e)
+
+</details>
 
 ---
 
