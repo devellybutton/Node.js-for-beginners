@@ -53,10 +53,14 @@
 C:\Users\airyt\제로초교과서>cd "C:\Users\airyt\제로초교과서\"
 C:\Users\airyt\제로초교과서>node helloWorld.js
 ```
+<details>
+<summary>REPL 출력 예시 </summary>
+
 ![image](https://github.com/user-attachments/assets/8bd04a5c-6b4f-4f02-9eb7-c5f161ec5786)
 
 ![image](https://github.com/user-attachments/assets/3ab98e9c-0772-4521-90b9-20ada4f2bb80)
 
+</details>
 
 ### REPL 모드 단축키
 - 나가기 :
@@ -74,11 +78,16 @@ C:\Users\airyt\제로초교과서>node helloWorld.js
     - `cd + 디렉토리 일부 입력 + tap` 누르면 자동완성 됨.
     - 한번 입력했던 명령어는 최신순으로 `방향키 위아래`로 불러올 수 있음.
 
-### VsCode 터미널에서 js 파일 실행
+### VSCode 터미널에서 js 파일 실행
 - <kbd>Ctrl</kbd> + <kbd>`</kbd>로 터미널 열기
 - 파워셀보다는 cmd가 나아서 `cmd`로 실행하면 좋음.
 - 해당 경로에서 `node + 파일명` 입력
+<details>
+<summary>VSCode 터미널 출력 예시</summary>
+
 ![ezgif-5-bb447cd7bc](https://github.com/user-attachments/assets/76135f47-3d27-41f3-be11-b8c4918bdad8)
+
+</details>
 
 ---
 
@@ -136,8 +145,12 @@ console.log("module", module);
 console.log("exports", exports);
 console.log("module.exports", module.exports);
 ```
+<details>
+<summary>예시 1 - 실행 결과</summary>
 
 ![image](https://github.com/user-attachments/assets/28b830c9-516e-440d-81bc-0c1358ed307c)
+
+</details>
 
 #### 예시 2: module.exports와 exports 혼용 시 참조 관계 끊어짐
 ```
@@ -155,7 +168,12 @@ console.log("module", module);
 console.log("exports", exports);
 console.log("module.exports", module.exports);
 ```
+<details>
+<summary>예시 2 - 실행 결과</summary>
+
 ![image](https://github.com/user-attachments/assets/fb49c958-8a90-48d1-aa80-ed7b5016e897)
+
+</details>
 
 #### 예시 3: 다른 파일에서 해당 모듈 불러올 때 module.exports로 내보낸 것만 불러와짐 
 ```
@@ -172,10 +190,105 @@ function checkOddOrEven(num) {
 
 module.exports = checkOddOrEven;
 ```
+<details>
+<summary>예시 3 - 실행 결과</summary>
+
 ![image](https://github.com/user-attachments/assets/8137b021-9890-4a6a-bb88-04f67e6b6d6e)
 
+</details>
 
-### this
+### 노드에서 this 사용시 주의할 점
+- <b>전역 스코프</b>에서 this : `modules.exports`와 동일, `빈 객체 {}`로 설정되어 있음.
+- <b>함수 내</b>에서 this : 전역 객체인 `global`을 가리킴. (브라우저에서는 window 객체)
+    ```
+    console.log(this)  // true
+
+    console.log(this === module.exports)  // true
+
+    function a() {
+    console.log(this === global);  // true
+    }
+
+    a();
+    ```
+
+- 전역 스코프에서 this를 사용하여 값을 할당하면, `module.exports`에 값이 추가됨.
+  - 이런 방식은 헷갈릴 수 있기 때문에 실제 코드에서는 잘 사용되지 않음.
+```
+const odd = '홀수입니다.';
+const even = '짝수입니다.';
+
+this.odd = odd;  // module.exports.odd = odd;
+this.even = even;  // module.exports.even = even;
+
+console.log(this);  // { odd: '홀수입니다.', even: '짝수입니다.' }
+```
+
+<details>
+<summary>실행 결과</summary>
+
+```
+// 1. 전역 스코프의 this
+console.log('1. 전역 this === module.exports:', this === module.exports);
+// 출력: true (전역에서는 module.exports 객체가 this로 사용됨)
+
+
+// 2. 동기 일반 함수의 this
+function syncNormalFunction() {
+    console.log('2. 동기 일반함수 this === global:', this === global);
+}
+syncNormalFunction();  // 출력: true (일반 함수에서의 this는 global 객체)
+
+// 3. 동기 화살표 함수의 this
+const syncArrowFunction = () => {
+    console.log('3. 동기 화살표함수 this === module.exports:', this === module.exports);
+}
+syncArrowFunction();  // 출력: true (화살표 함수는 상위 스코프의 this를 참조, module.exports)
+
+
+/*
+ * 4. 비동기 일반 함수의 this (setTimeout)
+ * 비동기 일반 함수에서의 this는 기본적으로 Timeout 객체를 참조
+ */
+setTimeout(function() {
+    console.log('4. 비동기 일반함수 this === global:', this === global); 
+}, 0);  // 출력: true (setTimeout의 콜백에서의 this는 Timeout 객체)
+
+
+/*
+ * 5. 비동기 화살표 함수의 this (setTimeout)
+ * 화살표 함수는 this를 상위 스코프에서 가져옴 (여기서는 module.exports)
+ */
+setTimeout(() => {
+    console.log('5. 비동기 화살표함수 this === module.exports:', this === module.exports); 
+}, 0);  // 출력: true (화살표 함수에서 this는 상위 스코프의 this, 즉 module.exports)
+
+
+/*
+ * 6. 객체 메서드에서의 this
+ * 메서드 내부에서의 this는 해당 객체를 참조
+ */
+const obj = {
+    method() {
+        console.log('6. 객체 메서드 this === obj:', this === obj);
+        
+        // setTimeout 내의 일반 함수
+        setTimeout(function() {
+            console.log('7. 객체 메서드 내 비동기 일반함수 this === global:', this === global); 
+        }, 0);
+
+        // setTimeout 내의 화살표 함수
+        setTimeout(() => {
+            console.log('8. 객체 메서드 내 비동기 화살표함수 this === obj:', this === obj); 
+        }, 0);
+    }
+};
+obj.method();
+```
+
+![image](https://github.com/user-attachments/assets/3a365014-e5ad-4bf3-b534-6ba7c4b622e9)
+
+</details>
 
 ### require
 
