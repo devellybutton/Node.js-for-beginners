@@ -107,6 +107,80 @@ C:\Users\airyt\제로초교과서>node helloWorld.js
 
 ## exports, this, require, 순환참조
 
+### exports와 module.exports
+
+- [exports와 module.exports 사용 예시](./exports-example/README.md)
+
+- Node.js에서 모든 파일은 모듈로 취급된다.
+- 모듈이 로딩될 때, 각 파일에는 기본적으로 `module.exports`에 빈 객체 {}가 할당되고, `exports`는 `module.exports`를 참조하는 객체로 설정된다.
+- 이 객체에 할당된 값이 해당 파일을 require로 가져올 때 반환되는 값이다.
+
+<br>
+
+- `module.exports`와 `exports`는 기본적으로 동일한 객체를 가리킨다. 
+- 하지만 `module.exports`를 새로 할당하면 `exports`와 `module.exports` 간의 관계가 끊어진다.
+- <b>하나의 값 (함수나 객체)</b>을 내보낼 때는 `module.exports`를 사용하고, <b>여러 값</b>을 내보낼 때는 `exports`에 속성을 추가하거나 `module.exports`에 객체를 할당하는 방식으로 사용한다.
+- 따라서 `module.exports`와 `exports`를 <b>혼용해서 사용하지 않도록</b> 주의해야 한다.
+
+#### 예시 1: exports와 module.exports의 참조 관계 유지
+```
+const odd = "홀수입니다.";
+const even = "짝수입니다.";
+
+module.exports = {
+  odd,
+  even,
+};
+
+console.log("module", module);
+console.log("exports", exports);
+console.log("module.exports", module.exports);
+```
+
+![image](https://github.com/user-attachments/assets/28b830c9-516e-440d-81bc-0c1358ed307c)
+
+#### 예시 2: module.exports와 exports 혼용 시 참조 관계 끊어짐
+```
+const odd = "홀수입니다.";
+const even = "짝수입니다.";
+
+exports.hello = "hello";
+
+module.exports = {
+  odd,
+  even,
+};
+
+console.log("module", module);
+console.log("exports", exports);
+console.log("module.exports", module.exports);
+```
+![image](https://github.com/user-attachments/assets/fb49c958-8a90-48d1-aa80-ed7b5016e897)
+
+#### 예시 3: 다른 파일에서 해당 모듈 불러올 때 module.exports로 내보낸 것만 불러와짐 
+```
+const importedModule = require("./var");
+
+console.log("importedModule", importedModule);
+
+function checkOddOrEven(num) {
+  if (num % 2) { 
+    return odd;
+  }
+  return even;
+}
+
+module.exports = checkOddOrEven;
+```
+![image](https://github.com/user-attachments/assets/8137b021-9890-4a6a-bb88-04f67e6b6d6e)
+
+
+### this
+
+### require
+
+### 순환참조
+
 ---
 
 ## ECMAScript 모듈, 다이나믹 임포트, top level await
