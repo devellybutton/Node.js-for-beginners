@@ -292,7 +292,47 @@ obj.method();
 
 ### require
 
+- require를 사용하면 모듈을 가져와 실행할 수 있음,
+- 실행만 원할 경우 변수에 대입하지 않고 그냥 `require('./파일경로')`만 해도 됨.
+
+#### require.main과 require.cache
+- `require.main`: 현재 실행된 메인 파일
+    - 어떤 파일이 프로그램의 시작점으로 실행되었는지 알 수 있음.
+- `require.cache`: 캐시된 모듈을 관리하는 객체
+    - 모듈은 한 번 require 되면 메모리에 캐시되고, <b>두 번째 이후의 호출은 캐시에서</b> 불러오기 때문에 파일을 다시 읽지 않음.
+    - 캐싱 : 하드디스크에 있는 걸 메모리로 옮겨옴.
+        - 하드디스크에서 읽어오는 건 느리고, 메모리에서 불러오는 건 빠름.
+
+#### require.cache 직접 비우기
+- `require.cache` 객체에서 특정 모듈을 제거하면, 캐시를 비우고 다시 읽기할 수 있음.
+- 이 작업은 효율적이지 않으며, 위험할 수 있기 때문에 일반적으로 사용하지 않음.
+
+<details>
+<summary>require 출력 결과</summary>
+
+![image](https://github.com/user-attachments/assets/6da19917-665e-4712-9787-c291a8d90d35)
+
+</details>
+
+#### require과 import 비교
+- `require` : 위치에 상관없이 사용할 수 있음
+- `import` : 반드시 파일의 상단에 위치해야 함
+```
+// require 예시
+const varModule = require('./var'); 
+
+// import 예시 (ES6+)
+import varModule from './var';
+```
+
 ### 순환참조
+- 두 개 이상의 모듈이 서로를 **require**하여 의존하는 상황
+- 예를 들어, `dep1`이 `dep2`를 require하고, `dep2`가 다시 `dep1`을 require하는 경우
+
+![image](https://github.com/user-attachments/assets/32b47d63-09bd-43f6-832e-93d928cc9055)
+- `dep1.js`가 `dep2.js`를 require하고, `dep2.js`는 `dep1.js`를 require하고 있기 때문에 순환 참조가 발생함.
+- Node.js는 순환 참조를 처리하려고 하지만, 첫 번째 require에서 <b>모듈이 완전히 로드되지 않은 상태로 반환</b>됨.
+- 이 때문에 `dep2.someValue`는 `undefined`로 출력됨.
 
 ---
 
