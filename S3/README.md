@@ -363,17 +363,165 @@ import varModule from './var';
 
 ## global, console, 타이머
 
+### 1. global 객체
+- `global`은 node.js의 전역 객체로, 브라우저의 `window`와 비슷한 역할을 함.
+- 모든 파일에서 접근 가능하며, `console`, `require` 등도 global의 속성임.
+- global 속성에 값을 대입하는 것은 <b>관리하기 어려우므로</b>, 가능하면 모듈화하는 것이 좋음.
+```
+// globalA.js
+module.exports = () => global.message;
+
+// globalB.js
+const A = require('./globalA');
+global.message = '안녕하세요.';
+console.log(A());  // '안녕하세요.'
+```
+
+### 2. console 객체
+- `console.log()`: 일반적인 로그를 콘솔에 출력
+- `console.error()`: 에러 메시지를 콘솔에 출력
+- `console.table()`: 배열 또는 객체를 테이블 형식으로 출력
+- `console.dir()`: 객체를 더 상세하게 출력합니다.
+    - options: colors와 depth를 설정할 수 있습니다.
+- `console.time()` / `console.timeEnd()`: 코드 실행 시간을 측정
+- `console.trace()`: 호출 스택을 추적하여 에러 발생 위치를 확인
+
+<details>
+<summary>예시 코드와 출력 결과</summary>
+
+```
+console.log('이것은 일반 로그입니다');
+console.error('이것은 에러 메시지입니다');
+console.table([{ name: 'John', age: 30 }, { name: 'Jane', age: 25 }]);
+console.dir({ name: 'Alice', age: 28, address: { city: 'Seoul', country: 'Korea' } }, { depth: 2, colors: true });
+console.time('타이머');
+for (let i = 0; i < 1000000; i++) { /* 반복 */ }
+console.timeEnd('타이머');
+console.trace('호출 스택 추적');
+```
+
+![image](https://github.com/user-attachments/assets/a1c57a9a-672f-4255-92cf-67821251925a)
+
+</details>
+
+### 3. 타이머 함수
+
+- `setTimeout(callback, delay)`: 지정된 시간 후에 callback을 실행
+- `setInterval(callback, interval)`: 지정된 시간 간격으로 callback을 반복 실행
+- `setImmediate(callback)`: 즉시 실행됩니다. 기본적으로 이벤트 루프의 다음 사이클에서 실행
+- `clearTimeout(id)` / `clearInterval(id)` / `clearImmediate(id)`: 타이머를 취소
+```
+// setTimeout 예시
+setTimeout(() => console.log('1초 후 실행'), 1000);
+
+// setInterval 예시
+const intervalId = setInterval(() => console.log('2초마다 실행'), 2000);
+
+// setImmediate 예시
+setImmediate(() => console.log('즉시 실행'));
+
+// 타이머 취소
+clearInterval(intervalId);
+```
+
 ---
 
 ## process
+- 현재 실행 중인 Node.js 프로세스에 대한 정보를 제공함.
+- 주로 프로세스 상태나 환경을 확인할 때 사용됨.
+
+### 주요 속성
+- `process.version` : 현재 실행 중인 Node.js의 버전 정보 제공
+- `process.arch` : 프로세스 아키텍처 정보를 제공 (예: x64 (64비트), arm, ia32 등)
+- `process.platform` : 운영체제의 플랫폼 정보를 제공 (예: win32, linux, darwin 등)
+- `process.pid`: 현재 Node.js 프로세스의 ID
+- `process.uptime()` : Node.js 프로세스가 시작된 이후 흐른 시간을 초 단위로 반환
+- `process.execPath` : Node.js 실행 파일의 경로를 반환
+- `process.cwd()` : 현재 작업 중인 디렉터리 경로를 반환
+    - node 명령어를 어디서 실행했는지 파악 가능 
+- `process.cpuUsage()` : 프로세스의 CPU 사용량을 반환
+    - `{ user, system }` 형식으로 반환되며, 각각 사용자 모드와 시스템 모드에서 소비한 CPU 시간
+
+<details>
+<summary>process 속성 출력 결과</summary>
+
+```
+console.log('노드 버전:', process.version);
+console.log('프로세서 아키텍처:', process.arch);
+console.log('운영체제 플랫폼:', process.platform);
+console.log('현재 프로세스 ID:', process.pid);
+console.log('프로세스 시작 후 경과 시간 (초):', process.uptime());
+console.log('노드 실행 파일 경로:', process.execPath);
+console.log('현재 작업 디렉토리:', process.cwd());
+console.log('현재 프로세스 CPU 사용량:', process.cpuUsage());
+```
+
+![image](https://github.com/user-attachments/assets/728cb22a-4498-4c69-bc13-7f67a406249c)
+
+</details>
+
+### 환경 변수 (process.env)
+- node.js 실행 시 시스템에 설정된 환경 변수들을 객체 형태로 접근할 수 있음.
+- 민감한 정보(비밀번호, API 키 등)는 `process.env`를 통해 환경 변수를 사용해 관리하는 것이 안전함.
+- `NODE_OPTIONS` : 노드를 실행할 때의 옵션들을 입력받는 환경 변수 
+    - `NODE_OPTIONS=--max-old-space-size=8192` : 노드의 메모리를 8GB까지 사용
+- `UV_THREADPOOL_SIZE` : 노드에서 기본적으로 사용하는 스레드 풀의 스레드 개수 조절
+    - `UV_THREADPOOL_SIZE=8` : 스레드풀에서 스레드 8개까지 사용
+
+### 프로세스 종료
+- `process.exit(0)`: 정상 종료
+- `process.exit(1)`: 비정상 종료
+
+### 비동기 함수 실행 우선순위
+1. `process.nextTick` -> 가장 먼저 실행
+2. `Promise의 .then() 또는 catch()` -> process.nextTick 후, 이벤트 루프 사이클 내에서
+3. `setImmediate()` -> 이벤트 루프의 현재 사이클이 끝난 후
+4. `setTimeout()` -> 지정된 시간 후 실행되며, 실행 순서는 환경에 따라 달라짐
+
+### 마이크로태스크의 재귀 호출
+- `process.nextTick` 또는 `Promise`의 콜백이 재귀적으로 호출되면, 이벤트 루프는 다른 매크로태스크를 실행하지 않고 <b>계속해서 마이크로태스크만 처리</b>할 수 있음.
+- 이로 인해 콜백이 무한히 실행될 수 있으며, 다른 이벤트 루프의 콜백들이 실행되지 않게 될 위험이 있음. 
+- 따라서 마이크로태스크의 재귀 호출은 주의해서 사용해야 함.
 
 ---
 
 ## os와 path
 
+### OS 모듈
+- 운영체제 관련 정보를 가져오는 내장 모듈
+- 서버 환경을 다룰 때 유용하며, 시스템의 상태나 자원에 관한 정보를 확인
+
+#### 주요 메서드
+- `os.arch()`: 운영체제의 아키텍처 정보를 반환합니다. (예: x64 (64비트), arm 등)
+- `os.platform()`: 운영체제의 플랫폼 정보를 반환합니다. 예: win32 (Windows), linux, darwin (macOS) 등.
+- `os.type()`: 운영체제의 종류를 반환합니다. 예: Windows_NT, Linux, Darwin 등.
+- `os.uptime()`: 시스템이 부팅된 후 경과한 시간을 초 단위로 반환합니다.
+- `os.hostname()`: 컴퓨터의 호스트명을 반환
+- `os.release()`: 운영체제의 버전 정보를 반환
+- `os.homedir()`: 사용자의 홈 디렉터리 경로를 반환
+- `os.tmpdir()`: 임시 파일이 저장될 디렉터리 경로를 반환
+- `os.cpus()`: 시스템의 CPU 코어 정보와 각 코어의 세부 정보를 포함한 배열을 반환
+- `os.cpus().length`: 시스템의 CPU 코어 개수를 반환
+- `os.freemem()`: 사용 가능한 메모리 용량을 바이트 단위로 반환
+- `os.totalmem()`: 시스템의 총 메모리 용량을 바이트 단위로 반환
+
+### path 모듈
+- 경로를 처리하고, 플랫폼에 맞는 경로 구분자를 제공하는 내장 모듈
+
+#### 주요 메서드
+- `path.join()`: 여러 경로를 결합하여 하나의 경로로 제작
+    - 예: `path.join(__dirname, 'var.js')`는 현재 디렉터리와 var.js를 결합
+    - Windows에서 \, POSIX (Linux/macOS)에서는 /를 사용하여 경로를 결합
+- `path.resolve()`: 절대 경로를 반환
+    - 예: `path.resolve(__dirname, '..', '/var.js')`는 절대 경로로 /var.js를 반환
+- `path.normalize()`: 경로 내의 불필요한 . 또는 .. 등을 제거하고, 플랫폼에 맞는 경로 구분자를 자동으로 정리
+- `path.relative()`: 두 경로 간의 상대 경로를 계산
+
 ---
 
 ## url, dns, searchParams
+
+![image](https://github.com/user-attachments/assets/eebc33fe-a9b0-44a2-a170-f2b26cbd6d4c)
 
 ---
 
