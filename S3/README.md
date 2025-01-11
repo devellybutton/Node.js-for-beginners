@@ -329,14 +329,35 @@ import varModule from './var';
 - 두 개 이상의 모듈이 서로를 **require**하여 의존하는 상황
 - 예를 들어, `dep1`이 `dep2`를 require하고, `dep2`가 다시 `dep1`을 require하는 경우
 
+<details>
+<summary>순환참조 예시 상황</summary>
+
 ![image](https://github.com/user-attachments/assets/32b47d63-09bd-43f6-832e-93d928cc9055)
+
+
 - `dep1.js`가 `dep2.js`를 require하고, `dep2.js`는 `dep1.js`를 require하고 있기 때문에 순환 참조가 발생함.
 - Node.js는 순환 참조를 처리하려고 하지만, 첫 번째 require에서 <b>모듈이 완전히 로드되지 않은 상태로 반환</b>됨.
 - 이 때문에 `dep2.someValue`는 `undefined`로 출력됨.
 
+</details>
+
 ---
 
 ## ECMAScript 모듈, 다이나믹 임포트, top level await
+
+- [CommonJS vs ES Modules](./ESM-CommonJS/README.md)
+
+| 항목                          | CommonJS 모듈                          | ECMAScript 모듈 (ESM)             |
+|-----------------------------|--------------------------------------|----------------------------------|
+| **문법**                     | `require('./a');` <br> `module.exports = A;` <br> `exports.C = D;` <br> `exports.E = F;` <br> `const { C, E } = require('./b');`  | `import './a.mjs';` <br> `export default A;` <br> `export const C = D;` <br> `export { E };` <br> `import { C, E } from './b.mjs';` |
+| **확장자**                   | .js, .cjs                            | .js (package.json에 `type: "module"` 필요), .mjs   |
+| **확장자 생략**               | 가능                                 | 불가능                           |
+| **다이내믹 임포트**           | 가능 <br>(예: `require('./module')`)      | 불가능 <br>(정적 임포트만 가능)      |
+| **인덱스(index) 생략**        | 가능 <br>(예: `require('./folder')`)      | 불가능 <br>(예: `import './folder/index.mjs'`) |
+| **Top Level Await**          | 불가능                               | 가능 <br>(최상위 레벨에서 `await` 사용 가능)  |
+| **`__filename`, `__dirname`, `require`, `module.exports`, `exports` 사용** | 사용 가능 <br>(Node.js에서 기본 제공) | 사용 불가능 <br>(`__filename` 대신 `import.meta.url` 사용) |
+| **서로 간 호출**              | 가능 <br>(CommonJS와 ESM 간 호출 가능)    | 불가능 <br>(호환성 제한, `import()`와 `require()` 간 호출 불가) |
+
 
 ---
 
