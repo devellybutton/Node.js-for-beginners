@@ -65,7 +65,6 @@
     - `pnpm`: 하드 링크를 사용하여 디스크 공간을 절약하고 더 빠른 설치를 제공
 
 ### 5. npm i vs npm ci
-- [npm i과 npm ci 비교](./npmi_npmci/README.md)
 - [stackoverflow - npm i vs npm ci](https://stackoverflow.com/questions/52499617/what-is-the-difference-between-npm-install-and-npm-ci)
 
 #### npm i
@@ -149,7 +148,7 @@
 - 버전을 배포한 후, 해당 버전의 내용을 수정할 수 없음. 
 - 수정 사항이 있을 경우 적절한 버전 번호(Major, Minor, Patch)를 올려서 새로운 버전으로 배포해야 함.
 
-#### SemVer 규칙
+#### 1) SemVer 규칙
 - <b>Major (주 버전)</b>
     - 하위 버전과 호환되지 않는 수정 사항이 생겼을 때 버전 번호를 올림
     - 메이저 버전이 0이면 초기 개발 중, 1이면 정식버전
@@ -162,8 +161,9 @@
     - <i>예: 1.1.1 → 1.1.2 (버그 수정)</i>
 
     ![image](https://github.com/user-attachments/assets/d60d1ef8-b042-47ce-85c5-858275bf7416)
+    출처 : [Node.js 교과서](https://thebook.io/080334/0246/)
 
-#### 버전 관리 기호
+#### 2) 버전 관리 기호
 
 | 기호      | 설명                                  | 예시                                | 설치되는 버전 범위                     |
 |-----------|---------------------------------------|-------------------------------------|---------------------------------------|
