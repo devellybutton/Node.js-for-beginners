@@ -327,13 +327,268 @@ app.get('/',
 
 ## morgan, bodyParser, cookieParser
 
+### 1. morgan
+- 요청/응답 로깅을 담당
+- `dev`는 간단한 로그, `combined`는 더 자세한 로그 제공
+```
+const morgan = require('morgan');
+
+// 개발 환경
+app.use(morgan('dev'));
+
+// 배포 환경
+app.use(morgan('combined'));
+```
+
+<details>
+<summary>morgan 로깅 예시</summary>
+
+- dev
+    ![image](https://github.com/user-attachments/assets/51d696d5-d3b9-41ac-87d0-6e2118d8fbfb)
+
+- combinded
+    ![image](https://github.com/user-attachments/assets/299474d3-3af2-4343-9612-5295c7e457b7)
+
+
+</details>
+
+### 2. bodyParser
+- 요청의 본문에 있는 데이터를 해석해서 `req.body` 객체로 만들어주는 미들웨어
+- 보통 <b>폼 데이터</b>나 <b>AJAX 요청</b>의 데이터를 처리
+- 멀티파트(이미지, 동영상, 파일) 데이터는 처리 불가 => `multer`
+- 2014년 6월 19일부터 bodyParser() 생성자 사용 중단
+- `urlencoded()`에서 `extended` 옵션의 기본값이 제거됨 → 명시적으로 지정 필요
+- Express 4.16.0부터는 별도의 `body-parser` 패키지 설치 없이 `express.json()`과 `express.urlencoded()` 사용 가능
+
+#### 1) 과거 방식 (2014년 6월 19일 이전) - 현재 deprecated
+```
+app.use(bodyParser());  // ❌ 더 이상 사용하지 않음
+```
+
+#### 2) 개별 메서드 호출 방식
+```
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));  // extended 옵션 필수
+app.use(bodyParser.json());
+```
+
+#### 3) Express 4.16.0 이후 현재 권장 방식
+- body-parser가 Express에 내장됨
+    ```
+    app.use(express.json());  // JSON 파싱
+    app.use(express.urlencoded({ extended: true }));  // Form 데이터 파싱
+    ```
+- `express.json()`: JSON 형식의 요청 본문 파싱
+- `express.urlencoded()`: 폼 데이터 파싱
+    - extended: true → <b>qs 모듈</b> 사용 (더 강력한 기능)
+    - extended: false → <b>querystring</b> 모듈 사용
+
+[stackoverflow - bodyParser is deprecated express 4](https://stackoverflow.com/questions/24330014/bodyparser-is-deprecated-express-4)
+
+![image](https://github.com/user-attachments/assets/ff45af24-1ce1-46de-8646-24657b6e6703)
+
+#### 4) body-parser을 직접 호출해야하는 경우
+- body-parser는 JSON과 URL-encoded 형식의 데이터 외에도 Raw, Text 형식의 데이터를 추가로 해석 가능
+    - `Raw` : 요청의 본문이 버퍼 데이터일 때
+    - `Text` : 요청의 본문이 텍스트 데이터일 때 해석하는 미들웨어
+```
+const bodyParser = require('body-parser');
+app.use(bodyParser.raw());
+app.use(bodyParser.text());
+```
+
+### 3. cookieParser
+- 쿠키 파싱 담당 (key, value)
+- `res.cookie(키, 값, 옵션)`형식으로 사용
+- 서명된 쿠키는 `req.signedCookies`로 접근
+    ```
+    const cookieParser = require('cookie-parser');
+    app.use(cookieParser('비밀키'));
+    ```
+- 쿠키를 지우려면, 키와 값 외에 옵션도 정확히 일치해야 됨. (단, `expires`나 `maxAge` 옵션은 일치할 필요가 없음.)
+```
+res.cookie('name', 'zerocho', { 
+  expires: new Date(Date.now() + 900000),
+  httpOnly: true, 
+  secure: true,
+});
+res.clearCookie('name', 'zerocho', { httpOnly: true, secure: true, signed: true });
+```
+
 ----
 
 ## static 미들웨어
 
+### 1. 정적 파일 서빙 기본 설정
+- 클라이언트가 `localhost:3000/zerocho.html`을 요청
+- 서버는 `/public/zerocho.html`을 찾아 제공
+- 관례적으로 `public` 폴더명을 사용하면 예측하기 쉬워서 변경하는게 좋음.
+```
+// 기본 문법
+app.use('요청 경로', express.static('실제 경로'))
+
+// 실제 사용 예시
+app.use('/', express.static(__dirname + '/public'))
+```
+
+### 2. 미들웨어 실행 순서
+- 기본적인 미들웨어 순서
+```
+app.use('/', express.static(__dirname + '/public'))
+app.use(cookieParser())
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+```
+static 미들웨어의 특징
+- 요청된 파일을 찾으면 `next()`를 실행하지 않고 즉시 응답을 종료
+- 파일을 찾지 못한 경우에만 다음 미들웨어로 진행
+```
+// public 폴더에 about 페이지가 없는 경우에만 실행됨
+app.get('/about', (req, res) => {
+    res.send('About 페이지입니다.');
+})
+```
+
+### 3. 성능과 보안을 고려한 미들웨어 구성
+- 성능이 느려질 수 있는 구성
+```
+app.use(cookieParser())
+app.use(express.json())
+// 기타 미들웨어들...
+app.use(express.urlencoded({ extended: true }))
+app.use('/', express.static(__dirname + '/public'))
+```
+- 로그인한 사람들한테 정적파일 제공할 때 순서 이렇게 써줌.
+```
+app.use(morgan('dev'))
+app.use(cookieParser('zerofo'))
+app.use(express-session())
+app.use('/', express.static(__dirname + '/public'))
+```
+
 ----
 
 ## express-session 미들웨어
+
+### 1. express-session 미들웨어 
+- 각 사용자에게 고유한 세션을 만들어 데이터를 저장할 수 있게 해주는 미들웨어
+- 주로 로그인 상태를 관리하거나 사용자별 데이터를 임시로 저장하는 데 사용
+- `express-session` 1.5 버전 이전에는 `cookie-parser` 뒤에 위치해야 했지만, 1.5 버전 이후부터는 순서가 상관없음. 버전을 모를 경우 `cookie-parser` 뒤에 두는 것이 안전함.
+    ```
+    const express = require('express');
+    const session = require('express-session');
+    const dotenv = require('dotenv');
+
+    dotenv.config(); // .env 파일을 읽어 환경 변수를 설정
+
+    const app = express();
+
+    app.use(session({
+    resave: false,           // 세션이 수정되지 않았더라도 세션을 저장할지 설정
+    saveUninitialized: false, // 세션에 값이 없어도 초기화할지 설정
+    secret: process.env.COOKIE_SECRET, // 서명할 때 사용할 비밀 키
+    cookie: {
+        httpOnly: true,        // 클라이언트에서 쿠키 접근을 막음
+        secure: false,         // HTTPS 환경에서만 사용할 때 true
+    },
+    name: 'session-cookie',  // 쿠키 이름 설정 (기본값: connect.sid)
+    }));
+
+    // 세션에 값 저장
+    app.get('/set-session', (req, res) => {
+    req.session.username = 'zerocho';
+    res.send('세션에 사용자 이름 저장됨!');
+    });
+
+    // 세션에서 값 읽기
+    app.get('/get-session', (req, res) => {
+    res.send(`세션에 저장된 사용자 이름: ${req.session.username}`);
+    });
+
+    // 세션 삭제
+    app.get('/destroy-session', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+        return res.send('세션 삭제 실패');
+        }
+        res.send('세션 삭제됨');
+    });
+    });
+
+    app.listen(3000, () => {
+    console.log('서버가 3000번 포트에서 실행 중입니다.');
+    });
+    ```
+
+### 2. 미들웨어 간 데이터 공유 방법
+- 좋은 예시
+```
+// 1. req 객체 사용 (요청 하나 동안만 유지)
+app.use((req, res, next) => {
+  req.data = '데이터';
+  next();
+}, (req, res, next) => {
+  console.log(req.data);
+  next();
+});
+
+// 2. res.locals 사용 (요청 하나 동안만 유지)
+app.use((req, res, next) => {
+  res.locals.data = '데이터';
+  next();
+}, (req, res, next) => {
+  console.log(res.locals.data);
+  next();
+});
+```
+
+- 나쁜 예시
+```
+// ❌ 전역 변수 사용 - 보안 위험
+let data;
+app.use((req, res, next) => {
+  data = '비밀번호';
+});
+
+// ❌ app.set 사용 - 서버 전체에서 공유됨
+app.use((req, res, next) => {
+  app.set('data', '비밀번호');
+});
+```
+
+### 3. 미들웨어 확장하기 
+- 미들웨어 안에 미들웨어를 넣어 조건부로 실행 가능
+- CORS나 Passport 미들웨어를 추가할 때 사용
+```
+app.use('/', (req, res, next) => {
+  if (req.session.id) {
+    // 로그인된 경우에만 정적 파일 제공
+    express.static(__dirname, 'public')(req, res, next);
+  } else {
+    next();
+  }
+});
+```
+### 4. `app.set` vs `req/res` 객체
+- `app.set()`: 서버의 전역적인 설정이나 공유할 데이터를 설정하는 데 사용
+- `req/res 객체` : 요청/응답 사이클 동안 데이터가 유지됨. 주로 개별 요청 간에 데이터를 전달할 때 사용됨.
+```
+// app.set 사용 예시
+app.set('appName', 'My Express App');
+app.get('/', (req, res) => {
+  res.send(`앱 이름: ${app.get('appName')}`);
+});
+
+// req/res 객체 사용 예시
+app.use((req, res, next) => {
+  req.data = '요청 간 데이터';
+  next();
+});
+
+app.get('/', (req, res) => {
+  res.send(req.data); // "요청 간 데이터" 출력
+});
+```
 
 ----
 
