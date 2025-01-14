@@ -705,9 +705,114 @@ app.post('/upload', upload.none(), (req, res) => {
 
 ## dotenv 사용하기
 
+- `.env` 파일: 민감한 정보를 저장하는 파일 (예: DB 비밀번호, API 키)
+- `dotenv` 패키지: .env 파일을 Node.js에서 환경변수로 사용할 수 있게 해줌.
+```
+// app.js
+const dotenv = require("dotenv");
+dotenv.config();
+```
+```
+// db.js
+console.log(process.env.DB_HOST);  // 'localhost' 출력
+console.log(process.env.DB_USER);  // 'root' 출력
+```
+
 ----
 
 ## 라우터 분리하기
+
+### 1. 라우터 분리 개념
+- express에서는 `app.js`에서 라우터가 많아지면 코드가 복잡해질 수 있음. 이를 해결하기 위해 라우터를 분리하여 관리할 수 있음. 
+- 예를 들어, `routes` 폴더를 만들어 `index.js`와 `user.js`와 같은 파일로 라우팅을 나누고, `app.js`에서 이를 연결함.
+#### routes/index.js
+```
+const express = require('express');
+const router = express.Router();
+
+// GET / 라우터
+router.get('/', (req, res) => {
+  res.send('Hello, Express');
+});
+
+module.exports = router;
+```
+#### routes/user.js
+```
+const express = require('express');
+const router = express.Router();
+
+// GET /user 라우터
+router.get('/', (req, res) => {
+  res.send('Hello, User');
+});
+
+module.exports = router;
+```
+#### app.js
+```
+const express = require('express');
+const app = express();
+const indexRouter = require('./routes');
+const userRouter = require('./routes/user');
+
+app.use('/', indexRouter);
+app.use('/user', userRouter);
+
+app.use((req, res, next) => {
+  res.status(404).send('Not Found');
+});
+```
+
+### 2. 라우트 매개변수 사용
+- 라우트 매개변수는 `:`을 사용하여 주소에 값을 넣을 수 있는 기능 (예: `/user/:id`)
+```
+router.get('/user/:id', (req, res) => {
+  console.log(req.params.id);  // :id 값 확인
+});
+```
+
+### 3. 라우트 순서
+- 라우트 매개변수를 사용하는 라우터는 다른 라우터보다 뒤에 위치해야함.
+- 그렇지 않으면 매개변수로 처리되는 경로가 우선적으로 실행되어 다른 라우터가 실행되지 않음.
+```
+router.get('/user/:id', (req, res) => {
+  console.log('얘만 실행됩니다.');
+});
+router.get('/user/like', (req, res) => {
+  console.log('전혀 실행되지 않습니다.');
+});
+```
+
+### 4. 쿼리스트링 사용
+- 쿼리스트링은 req.query 객체를 통해 접근
+```
+// 예: /users/123?limit=5&skip=10
+router.get('/users/:id', (req, res) => {
+  console.log(req.params.id);  // 123
+  console.log(req.query.limit);  // 5
+});
+```
+
+### 5. 404 에러 처리 미들웨어
+- 라우터에서 일치하는 경로가 없으면 404 상태 코드와 함께 메시지를 반환하도록 설정
+```
+app.use((req, res, next) => {
+  res.status(404).send('Not Found');
+});
+```
+
+### 6. router.route() 활용
+-  하나의 주소에 대해 여러 HTTP 메서드(GET, POST 등)를 <b>하나의 덩어리로</b> 묶을 수 있음.
+```
+router.route('/abc')
+  .get((req, res) => {
+    res.send('GET /abc');
+  })
+  .post((req, res) => {
+    res.send('POST /abc');
+  });
+```
 
 ----
 
