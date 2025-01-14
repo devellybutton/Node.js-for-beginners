@@ -84,6 +84,47 @@
 
 ## express로 HTML 서빙하기
 
+### 1. res.sendFile에서 파일 절대 경로 지정
+- `path.join(__dirname, '파일명')`로 파일의 절대경로 생성할 수 있음.
+- 올바른 예시
+    ```
+    app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+    });
+    ```
+- 틀린 예시
+    ```
+    app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "./index.html"));
+    });
+    ```
+
+<details>
+<summary>res.sendFile에서 파일 절대경로로 지정해줘야함</summary>
+
+![image](https://github.com/user-attachments/assets/1b81dcb2-136c-47ae-8c57-c115daabb602)
+
+</details>
+
+### 2. Nodemon에서 index.html 파일 감시 문제
+- nodemon은 기본적으로 `.html` 파일을 감시하지 않아서 파일이 변경되어도 서버가 자동으로 재시작되지 않음.
+- 만약 HTML 파일을 감시하고 싶다면 `nodemon.json` 설정 파일을 수정하거나, 명령어에서 `--ext` 옵션을 사용해 특정 파일 확장자를 지정해줄 수 있음.
+- 예: `js`와 `html` 파일 모두 변경 시 서버를 재시작하도록 설정
+    ```
+    nodemon --ext js,html app.js
+    ```
+
+### 3. 패키지 버전 확인
+- `npm ls`로 프로젝트에 설치된 특정 패키지의 버전을 확인
+- `package.json` 파일에 너무 많은 패키지가 설치된 경우, npm ls 명령어를 통해 설치된 의존성을 쉽게 확인할 수 있음.
+
+<details>
+<summary>npm ls 출력 예시</summary>
+
+![image](https://github.com/user-attachments/assets/848b3707-3676-40ee-8fda-217221744e96)
+
+</details>
+
 ----
 
 ## 미들웨어 사용하기
