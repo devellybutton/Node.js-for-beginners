@@ -231,10 +231,97 @@
     res.send('안녕하세요.');  // 자동으로 'text/html' Content-Type, status 200 설정됨
     ```
 
-
 ----
 
 ## next 활용법
+
+### 1. `res.json()` vs `return res.json()`
+```
+app.get('/test', (req, res) => {
+  return res.json({ hello: 'zerocho' });
+  console.log("안녕");  // 실행되지 않음
+});
+```
+```
+app.get('/test', (req, res) => {
+  res.json({ hello: 'zerocho' });
+  console.log("안녕");  // 실행됨.
+});
+```
+- `res.json()`은 응답을 전송하고 종료하는 메서드
+- `return`을 사용하여 응답을 보내면, 그 이후의 코드는 실행되지 않음.
+
+### 2. 에러 처리 미들웨어
+- `next(error)`: 에러가 발생하면 에러 처리 미들웨어로 이동
+- 에러 처리 미들웨어는 <b>4개의 인자 (err, req, res, next)</b>를 받아야만 정상적으로 동작
+- <b>next() 인수가 없으면</b>, 다음 미들웨어로 넘어감.
+```
+app.use(
+  (req, res, next) => {
+    console.log("모든 요청에 실행하고 싶어요!");
+    throw new Error();  // 에러 발생
+    next();  // 실행되지 않음, 에러가 발생하면 자동으로 다음 미들웨어로 넘어감
+  },
+  (req, res, next) => {
+    try {
+      console.log("에러어~~");
+    } catch (error) {
+      next(error);  // 에러가 발생하면 에러 처리 미들웨어로 넘어감
+    }
+  }
+);
+
+app.use((err, req, res, next) => {
+  console.error(err);  // 에러 출력
+  res.send("에러 났지롱. 근데 안 알려주지롱");
+});
+```
+
+### 3. next()를 사용하는 이유
+```
+app.get('/', (req, res, next) => {
+  // 라우터 내에서 직접적인 응답 없이,
+  // 다음 라우터나 미들웨어로 넘어가기 위해 사용
+  next();
+});
+```
+
+### 4. next('route')
+```
+app.get('/', 
+  (req, res, next) => {
+    // 첫 번째 미들웨어
+    next('route');
+  }, 
+  (req, res) => {
+    // 이 미들웨어는 실행되지 않음
+    console.log("실행되나요?");
+  }
+);
+```
+- `next('route')`는 현재 라우트의 나머지 미들웨어들을 건너뛰고 다음 라우트로 이동함.
+- 따라서 `console.log("실행되나요?")`는 절대 실행되지 않음.
+- 이런 구조가 필요한 이유는 <b>조건부 라우팅을 구현</b>할 때 유용하기 때문임.
+    ```
+    app.get('/user',
+    (req, res, next) => {
+        if (req.query.admin) {
+        next('route'); // 관리자용 라우트로 이동
+        } else {
+        next(); // 일반 사용자용 계속 진행
+        }
+    },
+    (req, res) => {
+        // 일반 사용자용 처리
+        res.send('일반 사용자 페이지');
+    }
+    );
+
+    app.get('/user', (req, res) => {
+    // 관리자용 처리
+    res.send('관리자 페이지');
+    });
+    ```
 
 ----
 
