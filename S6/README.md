@@ -129,9 +129,108 @@
 
 ## 미들웨어 사용하기
 
+### 1. 미들웨어와 `next()`
+- 미들웨어 : express에서 <b>요청과 응답 사이에서 실행되는 함수</b>
+    - `req` : 요청 객체(Request Object)
+    - `res` : 응답 객체(Response Object)
+    - `next()` : 다음 미들웨어나 라우트로 요청을 넘겨주는 함수
+- 여러 미들웨어가 순차적으로 실행될 수 있음.
+- `app.use()`는 미들웨어를 등록하는 <b>메서드</b>이고, `(req, res, next) 콜백함수`가 <b>미들웨어</b>임.
+- `next()` : 다음 미들웨어로 요청이 넘어감. 호출하지 않으면 `pending`으로 남을 수 있음.
+    ```
+    app.use((req, res, next) => {
+    console.log("모든 요청에 실행하고 싶어요!");
+    next();  // 다음 미들웨어로 넘어감. response나 next가 없으면 pending 상태
+    });
+    ```
+- 기본적으로 코드는 <b>위에서 아래로</b> 실행됨.
+- 미들웨어는 요청 <b>경로에 맞는 라우트</b>가 있을 경우 실행됨. 경로가 일치하지 않으면 다음 미들웨어로 넘어감.
+
+### 2. 라우팅과 라우트 파라미터
+- 라우트 매개변수(Route parameter) : `:`로 시작하는 값을 사용. `req.params`로 접근함.
+    ```
+    app.get('/category/:name', (req, res) => {
+    res.send(`hello ${req.params.name}`);
+    });
+
+    app.get('/category/javascript', (req, res) => {
+    res.send(`hello world`);
+    });
+    ```
+    - 브라우저에서 `/category/javascript`로 접근하면 라우트 파라미터가 처리되어 `req.params.name`은 javascript가 되어 `hello javascript`가 출력됨.`
+
+### 3. 와일드카드(*)
+- 와일드카드는 모든 경로를 처리하는 특성을 가지고 있기 때문에, <b>마지막에 배치</b>해야 다른 라우트들이 먼저 실행될 수 있음.
+- 와일드카드나, 범위가 넓은 요청들은 무조건 밑에 넣어 줘야됨.
+    ```
+    // 와일드카드 라우트는 마지막에 위치
+    app.get("*", (req, res) => {
+    res.send("This is the wildcard route, handling all paths.");
+    });
+    ```
+
 ----
 
 ## 미들웨어 특성 이해하기
+
+### 1. 라우팅 (Routing)
+- 사용자가 웹 브라우저에서 특정 URL을 요청했을 때, 그 <b>요청을 적절한 컨트롤러로 전달</b>하는 방식
+- 예: Express에서는 `app.get()`이나 `app.post()`와 같은 메서드를 사용하여 라우트를 정의
+
+### 2. 에러 미들웨어
+- Express는 기본적으로 에러가 발생하면 자동으로 처리하지만, 실무에서는 사용자 정의 에러 미들웨어를 작성함.
+- 에러 미들웨어는 <b>반드시 4개의 매개변수 (err, req, res, next)</b>를 가져야 함.
+    - 에러 미들웨어 (4개의 매개변수)
+    ```
+    app.use((err, req, res, next) => {
+    console.error(err);  // 에러 로깅
+    res.status(500).send('서버 에러 발생');  // 클라이언트에게 에러 응답
+    });
+    ```
+    - 잘못된 에러 미들웨어 (3개의 매개변수)
+    ```
+    app.use((err, req, res) => {
+    console.error(err);
+    res.status(500).send('서버 에러 발생');  // 매개변수 4개가 아니므로 잘못된 처리
+    });
+    ```
+### 3. HTTP 상태 코드
+- <b>200번대</b>: 정상적인 응답 (예: 200 OK, 201 Created 등)
+- <b>400번대</b>: 클라이언트 요청 오류 (예: 400 Bad Request, 404 Not Found 등)
+    - 보안을 위해 404로 퉁치는 경우가 많음. 
+    - 잘못된 경로를 숨기기 위해 해커가 요청한 URL을 보안상 처리함.
+- <b>500번대</b>: 서버 오류 (예: 500 Internal Server Error 등).
+    - 500번대 오류는 보안 위험이 없어야 함. 
+    - 정보 노출을 최소화해야 함.
+
+### 4. 응답 처리
+- `res.send()`, `res.json()`, `res.sendFile()` 등으로 다양한 응답
+
+    ![image](https://github.com/user-attachments/assets/a7af71b7-6b62-47dd-a853-afa368c5dc13)
+
+    ```
+    app.get('/', (req, res) => {
+    res.send('안녕하세요.');  // 텍스트 응답
+    });
+
+    app.get('/json', (req, res) => {
+    res.json({ hello: 'Zerocho' });  // JSON 응답
+    });
+    ```
+- `Cannot set headers after they are sent to the client` 에러 : 이미 응답이 전송된 후에 헤더를 다시 설정하려고 시도할 때 발생
+
+    ![image](https://github.com/user-attachments/assets/659cb795-e873-4672-b519-0356741de0ed)
+
+- http 모듈에서는 res.writeHead()로 상태 코드와 헤더의 Content-Type을 직접 지정해야 함.
+- Express에서는 res.send()로 응답을 보내면, 자동으로 Content-Type이 text/html로 설정됨.
+    ```
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('안녕하세요.');
+    ```
+    ```
+    res.send('안녕하세요.');  // 자동으로 'text/html' Content-Type, status 200 설정됨
+    ```
+
 
 ----
 
