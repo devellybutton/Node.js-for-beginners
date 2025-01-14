@@ -818,6 +818,54 @@ router.route('/abc')
 
 ## pug 템플릿 엔진
 
+### 1) 템플릿 엔진
+HTML의 정적인 단점을 개선
+- 반복문, 조건문, 변수 등을 사용할 수 있음
+- 동적인 페이지 작성 가능
+- PHP, JSP와 유사함
+
+### 2) EJS
+- 오래된 템플릿 엔진으로, HTML과 유사한 문법을 가지고 있어 사용이 직관적임.
+- Express 내부에서 사용되었으나, 현재는 제외됨.
+
+### 3) Pug (구 Jade)
+- 문법이 간단하고 코드량을 줄여주기 때문에 생산성에 유리함.
+- HTML 문법과는 다르게 구성되어 있어 읽기가 불편할 수 있음.
+- `doctype`, `html`, `head` 등의 태그를 화살괄호 없이 사용하며, 들여쓰기로 부모-자식 관계를 설정함.
+
+### 4) Pug 기본 설정
+```
+const express = require('express');
+const app = express();
+const path = require('path');
+
+// Pug 설정
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+```
+
 ----
 
 ## 넌적스 템플릿 엔진 
+- 넌적스는 HTML 문법을 그대로 사용하면서 자바스크립트 문법도 추가할 수 있는 템플릿 엔진
+- 퍼그보다 HTML에 가까워 HTML 문법을 선호하는 사람에게 유용함.
+- 넌적스 템플릿은 .njk 확장자를 사용하며, view engine은 njk로 설정
+
+### 설치 및 설정
+- `nunjucks.configure()`로 views 폴더와 옵션 설정
+- `watch: true`로 파일 변경 시 자동 렌더링
+- 넌적스 템플릿은 `.njk` 확장자를 사용하며, view engine은 `njk`로 설정
+```
+const path = require('path');
+const nunjucks = require('nunjucks');
+
+dotenv.config();
+const app = express();
+app.set('port', process.env.PORT || 3000);
+app.set('view engine', 'html');
+
+nunjucks.configure('views', { 
+  express: app,
+  watch: true,
+});
+```
