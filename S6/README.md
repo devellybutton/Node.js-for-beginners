@@ -594,6 +594,113 @@ app.get('/', (req, res) => {
 
 ## multer 사용하기
 
+### 1. Multer 설치 및 기본 설정
+- `multer`는 이미지, 동영상 등 파일을 멀티파트 형식으로 업로드할 때 사용하는 미들웨어
+    - `limits` 속성으로 파일 크기 제한을 설정
+    - `storage: multer.memoryStorage()`를 사용하여 파일을 메모리에 저장
+```
+const multer = require('multer');
+const fs = require('fs');
+
+// uploads 폴더 생성 (없으면 생성)
+try {
+  fs.readdirSync('uploads');
+} catch (error) {
+  fs.mkdirSync('uploads');
+}
+
+// multer 설정
+const upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, done) {
+      done(null, 'uploads/');
+    },
+    filename(req, file, done) {
+      const ext = path.extname(file.originalname);
+      done(null, path.basename(file.originalname, ext) + Date.now() + ext);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },  // 5MB 제한
+});
+```
+
+### 2. 단일 파일 업로드
+- `upload.single('image')`를 사용하여 하나의 파일을 업로드
+- image는 <input type="file" name="image" />의 name과 일치해야함.
+```
+app.post('/upload', upload.single('image'), (req, res) => {
+  console.log(req.file);  // 업로드된 파일 정보
+  console.log(req.body);  // 다른 폼 데이터
+  res.send('ok');
+});
+```
+
+### 3. 여러 파일 업로드
+- `upload.array('images')` 사용하여 여러 파일 업로드
+- 이때 HTML 폼에서 `multiple` 속성을 추가
+```
+app.post('/upload', upload.array('images'), (req, res) => {
+  console.log(req.files);  // 업로드된 파일 목록
+  console.log(req.body);   // 다른 폼 데이터
+  res.send('ok');
+});
+```
+
+### 5. 파일명 다르게 업로드하기
+- `upload.fields()` : 파일의 이름이 다른 경우 파일을 업로드 가능
+- name을 <b>배열</b>로 전달하여 여러 필드를 처리
+```
+app.post('/upload',
+  upload.fields([{ name: 'image1' }, { name: 'image2' }]),
+  (req, res) => {
+    console.log(req.files);  // { image1, image2 }
+    console.log(req.body);   // title 등
+    res.send('ok');
+  });
+```
+
+### 6. 파일 없이 폼 데이터만 처리
+- 파일 없이 폼 데이터만 처리하려면 `upload.none()` 사용
+```
+app.post('/upload', upload.none(), (req, res) => {
+  console.log(req.body);  // title 등 폼 데이터
+  res.send('ok');
+});
+```
+
+### 7. req.file / req.files 구조
+- 단일 파일 : `req.file`에 파일 정보가 들어감.
+```
+{
+  fieldname: 'image',
+  originalname: 'nodejs.png',
+  encoding: '7bit',
+  mimetype: 'image/png',
+  destination: 'uploads/',
+  filename: 'nodejs1514197844339.png',
+  path: 'uploads/nodejs1514197844339.png',
+  size: 53357
+}
+```
+- 여러 파일 : `req.files` 배열에 파일들이 들어감.
+
+### 8. 폼 예시
+- 단일 파일 업로드
+```
+<form action="/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="image" />
+  <input type="text" name="title" />
+  <button type="submit">업로드</button>
+</form>
+```
+- 여러 파일 업로드
+```
+<form action="/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="image1" />
+  <input type="file" name="image2" />
+  <button type="submit">업로드</button>
+</form>
+```
 ----
 
 ## dotenv 사용하기
