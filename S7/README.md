@@ -151,6 +151,7 @@ DESC users;
 ### CREATE
 
 - INSERT INTO [테이블명] ([컬럼1], [컬럼2], .. .) VALUES ([값1], [값 2], ...)
+- id는 AUTO_INCREMENT에 의해, created_at은 DEFAULT 값에 의해 자동으로 들어감.
 
 ![image](https://github.com/user-attachments/assets/7feb2cf1-4285-48f1-a69b-22c188538369)
 
@@ -209,6 +210,34 @@ DELETE FROM nodejs.users WHERE id = 2;
 ---
 
 ## 시퀄라이즈 사용하기
+### 1. 시퀄라이즈 ORM
+- MySQL 작업을 쉽게 할 수 있도록 도와주는 라이브러리
+- <b>ORM (Object Relational Mapping)</b> : 자바스크립트 객체와 데이터베이스의 릴레이션을 매핑해주는 도구
+- MySQL 외에도 다른 RDB (Maria, Postgre, SQLite, MSSQL)와도 호환됨
+- 자바스크립트 문법으로 데이터베이스 조작 가능
+
+### 2. Sequelize 설정 및 DB 연결 절차
+#### 1) package.json 추가 및 필요한 패키지 설치
+```
+npm install express morgan nunjucks sequelize sequelize-cli mysql2
+npm install --save-dev nodemon
+```
+- mysql2는 MySQL과 Node.js 간의 드라이버, DB가 아님.
+- 하나의 Node 애플리케이션에서 여러 개의 DB에 연결 가능
+
+#### 2) Sequelize 초기화
+```
+npx sequelize init
+```
+
+#### 3) DB 연결 실패 시 에러 메시지
+- `Error: connect ECONNREFUSED 127.0.0.1:3306` : MySQL 서버가 실행되지 않음
+- `Error: Access denied for user 'root'@'localhost' (using password: YES)` : 비밀번호 오류
+- `Error: Unknown database` : 데이터베이스 존재하지 않음
+
+#### 4) DB 연결 성공
+
+![image](https://github.com/user-attachments/assets/5fdefa6a-f929-460d-86b1-ce1774dcd485)
 
 ---
 
