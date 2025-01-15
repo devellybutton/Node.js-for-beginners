@@ -148,6 +148,64 @@ DESC users;
 
 ## CRUD 작업하기
 
+### CREATE
+
+- INSERT INTO [테이블명] ([컬럼1], [컬럼2], .. .) VALUES ([값1], [값 2], ...)
+
+![image](https://github.com/user-attachments/assets/7feb2cf1-4285-48f1-a69b-22c188538369)
+
+### READ
+
+- 테이블의 모든 데이터 조회
+```
+SELECT * FROM nodejs.users;
+```
+![image](https://github.com/user-attachments/assets/7580e873-c572-459c-952b-944d010339fd)
+
+- 특정 컬럼만 조회
+```
+SELECT name, married FROM nodejs.users;
+```
+![image](https://github.com/user-attachments/assets/c1624ef0-6101-42cd-89c8-78ec68549d79)
+
+- 특정 조건을 가진 데이터만 조회
+```
+SELECT name, age FROM nodejs.users WHERE married = 1 AND age > 30;
+```
+```
+SELECT id, name FROM nodejs.users WHERE married = 0 OR age > 30;
+```
+![image](https://github.com/user-attachments/assets/8be07a9b-21b7-493d-aacb-5f8ecfb7a5d0)
+
+- 정렬 : ASC, DESC
+```
+SELECT id, name FROM nodejs.users ORDER BY age DESC;
+``` 
+![image](https://github.com/user-attachments/assets/d6671851-bab5-48ca-938b-dd0254a87d7d)
+
+- `limit`: 조회할 개수, `offset`: 건너뛸 개수
+```
+ SELECT id, name FROM nodejs.users ORDER BY age DESC LIMIT 1;
+```
+```
+ SELECT id, name FROM nodejs.users ORDER BY age DESC LIMIT 1 OFFSET 1;
+```
+![image](https://github.com/user-attachments/assets/aff864b5-0b90-4d96-9b61-2207c84ea672)
+
+### Update
+-  UPDATE [테이블명] SET [컬럼명=바꿀 값] WHERE [조건]
+```
+UPDATE nodejs.users SET comment = '바꿀 내용' WHERE id = 2;
+```
+![image](https://github.com/user-attachments/assets/99763990-5a20-4945-b3dc-7e32c877ec65)
+
+### Delete
+- DELETE FROM [테이블명] WHERE [조건]
+```
+DELETE FROM nodejs.users WHERE id = 2;
+```
+![image](https://github.com/user-attachments/assets/b847e4b8-7860-4d7c-b99c-f9d94534ed0c)
+
 ---
 
 ## 시퀄라이즈 사용하기
