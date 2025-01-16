@@ -365,3 +365,5 @@ console.log(result);
 ---
 
 ## 시퀄라이즈 실습하기
+
+![image](https://github.com/user-attachments/assets/d4befff8-ab40-4e95-abaf-9a305ef7acf7)
