@@ -243,6 +243,58 @@ npx sequelize init
 
 ## 시퀄라이즈 모델 만들기
 
+### 1. Sequelize 모델 정의 패턴
+- Sequelize.Model을 확장한 클래스로 모델을 정의
+- 모델은 static `init` 메서드와 static `associate` 메서드로 구성
+    - `init` 메서드: 테이블 컬럼 및 테이블 설정을 정의
+    - `associate` 메서드: 다른 모델과의 관계를 설정
+
+### 2. init 메서드
+- init 메서드는 두 가지 인수를 받음.
+- <b>첫 번째 인수</b>: 테이블 컬럼에 대한 설정
+    - 각 컬럼은 Sequelize의 자료형을 사용하여 정의
+    - 예: STRING(100), INTEGER, BOOLEAN, DATE, INTEGER.UNSIGNED 등.
+- <b>두 번째 인수</b>: 테이블 자체에 대한 설정
+    - `sequelize`: DB 연결 객체를 지정
+    - `timestamps`: true로 설정 시 자동으로 createdAt과 updatedAt 컬럼을 추가. (예제에서는 false로 설정할 수 있음)
+    - `underscored`: 컬럼명과 테이블명을 스네이크 케이스로 설정.
+    - `modelName`: 모델의 이름을 지정
+    - `tableName`: 실제 테이블 이름을 지정. 기본적으로는 모델 이름을 소문자 복수형으로 사용
+    - `paranoid`: true로 설정 시 deletedAt 컬럼을 추가하여, 삭제된 데이터도 복구 가능.
+    - `charset`과 `collate`: 데이터베이스의 문자셋과 정렬 설정. 한글을 포함하려면 `utf8` 또는 `utf8mb4` 설정이 필요함.
+
+
+### 3. 테이블 설정 옵션
+- `timestamps`: true면 createdAt, updatedAt 자동 생성
+- `underscored`: true면 스네이크 케이스(created_at) 사용
+- `modelName`: 자바스크립트에서 사용할 모델 이름
+- `tableName`: 실제 DB 테이블 이름
+- `paranoid`: true면 삭제 시 deletedAt 컬럼에 시간 기록
+- `charset/collate`: 한글 지원을 위한 인코딩 설정
+
+### 4. Sequelize 자료형과 MySQL 자료형의 차이 비교
+
+| MySQL 자료형              | Sequelize 자료형     | 옵션/설명                                 |
+|---------------------------|----------------------|------------------------------------------|
+| `VARCHAR(100)`             | `STRING(100)`         | 문자열, 길이 제한                        |
+| `INT`                      | `INTEGER`             | 정수형                                   |
+| `TINYINT`                  | `BOOLEAN`             | 불리언값 (0 또는 1)                      |
+| `DATETIME`                 | `DATE`                | 날짜 및 시간                             |
+| `INT UNSIGNED`             | `INTEGER.UNSIGNED`    | 부호 없는 정수형                         |
+| `NOT NULL`                 | `allowNull: false`    | `NULL` 허용하지 않음                     |
+| `UNIQUE`                   | `unique: true`        | 유일한 값만 허용                         |
+| `DEFAULT NOW()`            | `defaultValue: Sequelize.NOW` | 기본값으로 현재 시간 설정           |
+
+### 5. 명명 규칙
+- <b>모델 이름</b>: 단수형 (예: User, Post)
+- <b>테이블 이름</b>: 복수형 (예: users, posts)
+- 시퀄라이즈가 자동으로 복수형으로 변환
+
+### 6. id 컬럼
+- 기본 키는 자동으로 생성되므로 따로 정의할 필요 없음
+
+![image](https://github.com/user-attachments/assets/fc34487a-1747-4964-8b87-26ac797f8dad)
+
 ---
 
 ## 테이블 관계 이해하기
