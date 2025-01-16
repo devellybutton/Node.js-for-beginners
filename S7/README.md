@@ -299,6 +299,58 @@ npx sequelize init
 
 ## 테이블 관계 이해하기
 
+### 1. 1:1 (일대일) 관계
+- 1:1 관계에서는 한 모델이 다른 모델과 1:1 관계를 맺음. 
+- 예를 들어, 사용자는 하나의 정보 테이블만 가질 수 있고, 정보 테이블은 하나의 사용자만을 가리킴.
+- hasOne vs belongsTo:
+    - `hasOne`: 한 모델이 다른 모델과 1:1 관계를 설정할 때 사용됨. hasOne을 설정한 모델에 외래 키(foreign key)가 추가됨. 이 외래 키는 belongsTo를 사용하는 모델에 위치함.
+    - `belongsTo`: 다른 모델의 외래 키(foreign key)를 포함하는 모델에 사용됨. belongsTo를 사용한 모델에 외래 키가 추가됨.
+```
+// 1:1 관계에서 `hasOne`과 `belongsTo` 설정
+db.User.hasOne(db.Info, { foreignKey: 'UserId', sourceKey: 'id' });
+db.Info.belongsTo(db.User, { foreignKey: 'UserId', targetKey: 'id' });
+```
+
+### 2. 1:N (일대다) 관계
+- 한 사용자는 여러 개의 댓글을 작성할 수 있음. 하지만 댓글 하나에 여러 명의 사용자가 있을 수는 없음.
+- User 모델은 hasMany를 사용하여 여러 개의 댓글을 가질 수 있음을 나타냄.
+- Comment 모델은 belongsTo를 사용하여 댓글이 작성자(User)를 참조함을 나타냄.
+```
+// User 모델
+db.User.hasMany(db.Comment, { foreignKey: 'commenter', sourceKey: 'id' });
+
+// Comment 모델
+db.Comment.belongsTo(db.User, { foreignKey: 'commenter', targetKey: 'id' });
+```
+
+### 3. N:M (다대다) 관계
+- 다대다 관계에서는 두 모델 간에 중간 테이블이 필요함. 
+- 예를 들어, 게시글과 해시태그는 다대다 관계. 하나의 게시글에는 여러 해시태그가 달릴 수 있고, 하나의 해시태그는 여러 게시글에 달릴 수 있음.
+- 다대다 관계에서는 두 모델을 연결하는 중간 테이블이 필요함. 
+    - 예를 들어, Post와 Hashtag 모델 간의 관계를 나타내기 위해 PostHashtag라는 중간 테이블을 만들 수 있음.
+    - 중간 테이블을 사용하지 않으면 <b>데이터 중복이 발생</b>할 수 있음.
+    - 정규화의 원칙에 따르면, 각 테이블의 컬럼에는 하나의 데이터만 포함되어야 하므로 중간 테이블을 사용하여 여러 데이터를 연결함.
+```
+// N:M 관계에서 `belongsToMany` 설정
+db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
+db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
+```
+
+### 4. foreignKey와 targetKey
+- `foreignKey`: 외래 키(다른 테이블의 기본 키를 참조하는 컬럼).
+- `sourceKey`: 참조하는 모델의 키
+- `targetKey`: 참조되는 모델의 키
+    - 예를 들어, Comment 모델에서는 commenter 컬럼이 User 모델의 id를 참조하는 외래 키
+
+### 5. 순환 참조 문제와 db 매개변수
+- require를 통해 <b>순환 참조를 방지</b>하기 위해 db 객체를 사용하여 모델들을 연결함.
+- 예를 들어, `user.js`와 `comment.js`가 서로를 require하지 않고 <b>index.js에서 db 객체</b>를 만들어 모델 간의 관계를 설정함.
+
+### 6. 요약
+- <b>1:1 관계</b>: 한 모델이 다른 모델과 1:1 관계를 설정할 때 `hasOne`과 `belongsTo`를 사용함. 외래 키는 `belongsTo`가 포함하는 모델에 위치함.
+- <b>1:N 관계</b>: 한 모델이 다른 모델과 1:N 관계를 설정할 때 `hasMany`와 `belongsTo`를 사용함. 외래 키는 `belongsTo`가 포함하는 모델에 위치함.
+- <b>N:M 관계</b>: 두 모델 간 다대다 관계를 표현할 때 <b>중간 테이블</b>을 사용해야 하며, 이를 통해 정규화가 유지됨. `belongsToMany`를 사용하여 관계를 설정하고, `through` 옵션으로 중간 테이블을 지정함.
+
 ---
 
 ## 시퀄라이즈 쿼리 알아보기
