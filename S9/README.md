@@ -123,9 +123,82 @@ npx sequelize db:create
 
 ## passport 세팅 및 회원가입 만들기
 
+### 1. passport 세팅
+#### 관련 라이브러리 설치
 ```
 npm i passport passport-local passport-kakao
 ```
+
+#### 미들웨어 구성
+```
+app.use(passport.initialize());  // passport 초기화
+app.use(passport.session());      // 세션을 passport로 관리
+```
+- `passport.initialize()` : 요청에서 `req.user`, `req.login`, `req.isAuthenticated`, `req.logout` 등을 사용할 수 있게 해줌.
+- `passport.session()` : `connect.sid`라는 이름으로 세션 쿠키를 브라우저로 전송하고 세션을 관리
+
+#### express-session 설정
+```
+app.use(express.json());           // JSON 요청 본문 파싱
+app.use(express.urlencoded({ extended: false })); // URL-encoded 요청 본문 파싱
+```
+#### Passport 설정 (localStrategy)
+```
+const passport = require("passport");
+const local = require("./localStrategy");  // 로그인 전략
+const kakao = require("./kakaoStrategy");  // 카카오 로그인 전략 (필요한 경우)
+const User = require("../models/users");
+
+module.exports = () => {
+  passport.serializeUser((user, done) => {
+    done(null, user.id);  // 세션에 저장할 정보는 사용자 ID
+  });
+
+  passport.deserializeUser((id, done) => {
+    User.findOne({ where: { id } })  // 세션에 저장된 ID로 사용자 정보 불러오기
+      .then((user) => done(null, user))
+      .catch((err) => done(err));
+  });
+
+  local();  // 로컬 로그인 전략 실행
+  kakao();  // 카카오 로그인 전략 실행 (필요한 경우)
+};
+```
+#### auth.js 컨트롤러의 회원가입 구현
+1. 사용자가 /join 라우터로 회원가입을 요청 <br>
+2. 이메일 중복 체크 후 비밀번호를 해싱하여 사용자 정보를 DB에 저장 <br>
+3. 성공하면 홈 화면(/)으로 리다이렉트 됨.
+```
+exports.join = async (req, res, next) => {
+  const { nick, email, password } = req.body;
+  try {
+    const exUser = await User.findOne({ where: { email } });
+    if (exUser) {
+      return res.redirect("/join?error=exist");
+    }
+    const hash = await bcrypt.hash(password, 12);
+    await User.create({
+      email,
+      nick,
+      password: hash,
+    });
+    return res.redirect("/");  // 회원가입 후 홈으로 리다이렉트
+  } catch (error) {
+    console.error(error);
+    next(error);  // 에러 핸들링
+  }
+};
+```
+
+### 2. passport 사용 흐름
+1. `/auth/login` 라우터 요청 <br>
+2. `passport.authenticate()` 호출 <br>
+3. 로그인 전략 (LocalStrategy) 수행 <br>
+4. 로그인 성공 시 사용자 정보 객체와 함께 `req.login` 호출 <br>
+5. `req.login` 메서드가 `passport.serializeUser` 호출 <br>
+6. `req.session`에 사용자 아이디나 저장해서 세션 생성 <br>
+7. `express-session`에 설정한 대로 브라우저에 `connect.sid` 세션 쿠키 전송 <br>
+8. 로그인 완료
 
 ---
 

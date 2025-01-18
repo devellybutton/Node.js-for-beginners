@@ -5,9 +5,10 @@ const {
   renderMain,
   renderProfile,
 } = require("../controllers/page");
+const { isLoggedIn, isNotLoggedIn } = require("../middlewares");
 
 router.use((req, res, next) => {
-  res.locals.user = null;
+  res.locals.user = req.user;
   res.locals.followerCount = 0;
   res.locals.followerCount = 0;
   res.locals.followingIdList = [];
