@@ -119,6 +119,29 @@ npx sequelize db:create
 - 테이블을 만들고 나면 <b>직접 DB에 접속</b>하여 확인할 것.
 - 노드에서 확인하는 것보다 DB 클라이언트를 사용하는 것이 좋음.
 
+### 7. 참고
+
+### 1) Sequelize 모델과 데이터베이스 동기화 문제 해결 방법: sequelize.sync() 활용
+- `npx sequelize migration:db` 명령어로 마이그레이션을 실행해도, 서버에서 정의한 모델 객체와 실제 데이터베이스 테이블 간에 <b>동기화가 되지 않아</b> 에러가 발생
+
+![Image](https://github.com/user-attachments/assets/414e3905-e6e8-4b77-a7cb-b23f477576cf)
+
+- 모델과 데이터베이스의 동기화를 맞추기 위해 `models/index.js`에서 `sequelize.sync()`를 사용하여 테이블을 동기화하여 해결하였음.
+```
+// 데이터베이스와 모델을 동기화 (테이블 생성)
+sequelize
+  .sync({ force: false }) // force: false -> 기존 데이터 유지하면서 동기화
+  .then(() => {
+    console.log("Database synced!");
+  })
+  .catch((err) => {
+    console.error("Error syncing database:", err);
+  });
+```
+
+### 2) .env 파일을 통한 동적 설정: config.js 파일 사용
+- 강의 소스코드에서는 `config.json`을 사용하지만, 대신 `config.js` 파일을 사용하여 환경 변수(.env)에서 설정을 동적으로 로드함.
+
 ---
 
 ## passport 세팅 및 회원가입 만들기
@@ -203,6 +226,22 @@ exports.join = async (req, res, next) => {
 ---
 
 ## passport로 이메일 로그인 만들기
+
+### 1. 세션 Id만 저장하는 이유
+- 세션 쿠키 : 유저id => 메모리에 저장됨.
+- 세션 ID는 서버에서 사용자 정보를 참조하는 키 역할
+- 실제 사용자 정보는 서버 메모리에서만 관리됨.
+
+### 2. 로그인 이후의 과정
+1. 요청이 들어옴 (어떤 요청이든 상관없음)
+2. 라우터에 요청이 도달하기 전에 `passport.session` 미들웨어가 `passport.deserializeUser` 메서드 호출
+3. `connect.sid` 세션 쿠키를 읽고 세션 객체를 찾아서 `req.session`으로 만듦.
+4. `req.session`에 저장된 아이디로 데이터베이스에서 사용자 조회
+5. 조회된 사용자 정보를 `req.user`에 저장
+6. 라우터에서 `req.user` 객체 사용 가능
+
+- `req.logout`을 하면 브라우저에 connect.sid가 남아있어도 세션을 없앰.
+
 
 ---
 

@@ -1,33 +1,50 @@
-const Sequelize = require('sequelize');
-const fs = require('fs');
-const path = require('path');
-const env = process.env.NODE_ENV || 'development';
-const config = require('../config/config')[env];
+const Sequelize = require("sequelize");
+const fs = require("fs");
+const path = require("path");
+const env = process.env.NODE_ENV || "development";
+const config = require("../config/config")[env];
 
 const db = {};
 const sequelize = new Sequelize(
-  config.database, config.username, config.password, config,
+  config.database,
+  config.username,
+  config.password,
+  config
 );
 
 db.sequelize = sequelize;
 
 const basename = path.basename(__filename);
-fs
-  .readdirSync(__dirname) // 현재 폴더의 모든 파일을 조회
-  .filter(file => { // 숨김 파일, index.js, js 확장자가 아닌 파일 필터링
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
+fs.readdirSync(__dirname) // 현재 폴더의 모든 파일을 조회
+  .filter((file) => {
+    // 숨김 파일, index.js, js 확장자가 아닌 파일 필터링
+    return (
+      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
+    );
   })
-  .forEach(file => { // 해당 파일의 모델 불러와서 init
+  .forEach((file) => {
+    // 해당 파일의 모델 불러와서 init
     const model = require(path.join(__dirname, file));
     console.log(file, model.name);
     db[model.name] = model;
     model.initiate(sequelize);
   });
 
-Object.keys(db).forEach(modelName => { // associate 호출
+Object.keys(db).forEach((modelName) => {
+  // associate 호출
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
+
+// 데이터베이스와 모델을 동기화 (테이블 생성)
+sequelize
+  .sync({ force: false }) // force: false -> 기존 데이터 유지하면서 동기화
+  .then(() => {
+    console.log("Database synced!");
+  })
+  .catch((err) => {
+    console.error("Error syncing database:", err);
+  });
 
 module.exports = db;

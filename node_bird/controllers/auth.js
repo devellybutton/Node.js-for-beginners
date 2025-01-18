@@ -21,6 +21,30 @@ exports.join = async (req, res, next) => {
   }
 };
 
-exports.login = () => {};
+exports.login = () => {
+  passport.authenticate("local", (authError, user, info) => {
+    if (authError) {
+      // 서버 실패
+      console.error(authError);
+      return next(authError);
+    }
+    if (!user) {
+      // 로직 실패
+      return res.redirect(`/?loginError=${info.message}`);
+    }
+    return req.login(user, (loginError) => {
+      // 로그인 성공
+      if (loginError) {
+        console.error(loginError);
+        return next(loginError);
+      }
+      return res.redirect("/");
+    });
+  })(req, res, next);
+};
 
-exports.logout = () => {};
+exports.logout = (req, res, next) => {
+  req.logout(() => {
+    res.redirect("/");
+  });
+};
