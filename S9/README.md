@@ -242,10 +242,31 @@ exports.join = async (req, res, next) => {
 
 - `req.logout`을 하면 브라우저에 connect.sid가 남아있어도 세션을 없앰.
 
-
 ---
 
 ## 카카오 로그인하기
+
+### 1. [카카오 로그인](https://developers.kakao.com/docs/latest/ko/kakaologin/common)
+- 로그인 인증과정을 카카오에게 맡기는 것
+  - 사용자는 번거롭게 새로운 사이트에 회원가입 하지 않아도 되고, 서비스 제공자는 로그인 과정을 안심하고 검증된 SNS에 맡길 수 있음.
+- SNS 로그인 특징은 <b>회원 가입 절차가 따로 없다는 것.</b> 
+  - 처음 로그인할 때는 회원 가입 처리를 해야하고, 두 번째 로그인부터는 로그인 처리를 해야함. 
+  - 따라서 SNS 로그인 전략은 로컬 로그인 전략보다 다소 복잡함.
+
+### 2. 미들웨어 확장패턴
+- 위랑 아래는 똑같은 코드임.
+- `app.use((req, res, next) => passport.authenticate('kakao')(req, res, next));`
+  - passport.authenticate('kakao')를 즉시 실행하는 함수로 감싼 형태
+  - <b>req, res, next를 로직 안에 넣고 싶은 경우</b> 사용
+- `app.use(passport.authenticate('kakao'))`
+  -  그 자체로 미들웨어로 등록
+
+### 3. 필요한 설정
+- 카카오 developers 사이트 접속
+- 앱 키 중 REST API 키 복사해서 dotenv 넣기
+- Web 플랫폼 등록 - 사이트 도메인 
+- redirect URI 등록
+- 카카오 로그인 - 동의항목 설정
 
 ---
 
