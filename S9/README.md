@@ -272,6 +272,13 @@ exports.join = async (req, res, next) => {
 
 ## 게시글, 이미지 업로드하기
 
+### uploads 폴더 존재 확인 및 생성
+- `fs.readdirSync('uploads')`로 uploads 폴더가 존재하는지 확인하고, 없다면 `fs.mkdirSync('uploads')`로 폴더를 생성
+
+### multer 설정 (파일 업로드)
+- `upload`: multer의 설정으로 이미지 파일을 uploads 폴더에 저장하고, 파일 이름에 현재 시간(Date.now())을 추가하여 고유한 파일 이름 생성
+- `limits: { fileSize: 5 * 1024 * 1024 }`로 파일 크기를 5MB로 제한
+
 ---
 
 ## 팔로우, 해시태그 검색 기능 만들기
