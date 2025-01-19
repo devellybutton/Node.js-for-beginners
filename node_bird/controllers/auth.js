@@ -1,8 +1,9 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const passport = require("passport");
 
 exports.join = async (req, res, next) => {
-  const { nick, email, passport } = req.body;
+  const { nick, email, password } = req.body;
   try {
     const exUser = await User.findOne({ where: { email } });
     if (exUser) {
@@ -21,7 +22,7 @@ exports.join = async (req, res, next) => {
   }
 };
 
-exports.login = () => {
+exports.login = (req, res, next) => {
   passport.authenticate("local", (authError, user, info) => {
     if (authError) {
       // 서버 실패

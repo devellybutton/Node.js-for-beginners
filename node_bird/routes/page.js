@@ -15,8 +15,8 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/profile", renderProfile);
-router.get("/join", renderJoin);
+router.get("/profile", isLoggedIn, renderProfile);
+router.get("/join", isNotLoggedIn, renderJoin);
 router.get("/", renderMain);
 
 module.exports = router;

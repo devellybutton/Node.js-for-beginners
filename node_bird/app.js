@@ -6,11 +6,11 @@ const session = require("express-session");
 const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
 const passport = require("passport");
-const { sequelize } = require("./models");
-const authRouter = require("./routes/auth");
 
 dotenv.config();
 const pageRouter = require("./routes/page");
+const authRouter = require("./routes/auth");
+const { sequelize } = require("./models");
 const passportConfig = require("./passport");
 
 const app = express();
@@ -21,6 +21,15 @@ nunjucks.configure("views", {
   express: app,
   watch: true,
 });
+// 데이터베이스와 모델을 동기화 (테이블 생성)
+sequelize
+  .sync({ force: false }) // force: false -> 기존 데이터 유지하면서 동기화
+  .then(() => {
+    console.log("Database synced!");
+  })
+  .catch((err) => {
+    console.error("Error syncing database:", err);
+  });
 
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));

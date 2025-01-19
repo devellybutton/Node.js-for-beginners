@@ -37,14 +37,4 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-// 데이터베이스와 모델을 동기화 (테이블 생성)
-sequelize
-  .sync({ force: false }) // force: false -> 기존 데이터 유지하면서 동기화
-  .then(() => {
-    console.log("Database synced!");
-  })
-  .catch((err) => {
-    console.error("Error syncing database:", err);
-  });
-
 module.exports = db;
