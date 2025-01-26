@@ -1,16 +1,16 @@
 {
-  "name": "nodebird",
+  "name": "nodecat",
   "version": "0.0.1",
-  "description": "익스프레스로 만드는 SNS 서비스",
+  "description": "nodebird 2차 서비스",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "start": "nodemon app"
   },
-  "author": "codingGhost",
-  "license": "MIT",
+  "keywords": [],
+  "author": "hello",
+  "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
@@ -24,10 +24,10 @@
     "passport-kakao": "^1.0.1",
     "passport-local": "^1.0.0",
     "sequelize": "^6.37.5",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "nodemon": "^3.1.9"
   }
 }
