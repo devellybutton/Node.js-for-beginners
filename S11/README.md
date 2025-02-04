@@ -18,6 +18,7 @@ npm i -D jest
 
 ![Image](https://github.com/user-attachments/assets/37087a84-729e-44a9-919c-700f03950ec8)
 
+- 테스트 파일 : spec.js, test.js
 
 ---
 

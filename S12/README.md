@@ -9,6 +9,121 @@
 
 ## WS 모듈 사용하기
 
+### 1. 웹 소켓
+- HTML5에 새로 추가된 스펙으로 실시간 양방향 데이터 전송을 위한 기술
+- HTTP와 다르게 WS라는 프로토콜을 사용함
+- 브라우저와 서버가 WS 프로토콜을 지원하면 사용할 수 있음. 
+- 최신 브라우저는 대부분 웹 소켓을 지원하고, 노드에서는 ws나 Socket.IO 같은 패키지를 통해 웹 소켓을 사용할 수 있음.
+
+### 2. 이전 기술: HTTP 폴링의 한계
+#### 웹 소켓 이전에는 HTTP 기반 폴링(polling) 방식이 주로 사용되었음.
+- 단방향 통신
+- 주기적으로 서버에 새로운 업데이트 확인
+- 비효율적이고 자원 소모적인 방식
+
+#### 웹 소켓의 핵심 특징
+- 브라우저와 웹 서버 간 지속적인 연결
+    - Listener : ws.on('message')
+    - Speaker : ws.send('message')
+- 실시간 양방향 데이터 전송
+- HTTP 프로토콜과 포트 공유
+- 폴링에 비해 성능 대폭 개선
+
+#### 연결 프로세스
+- 초기 웹 소켓 연결 수립
+- 이후 지속적인 연결 상태 유지
+- 업데이트 발생 시 즉각적인 알림
+
+#### 웹 소켓 구조도
+![Image](https://github.com/user-attachments/assets/f2beeda8-5558-45fa-9a23-7bfd426ea028)
+
+### 3. 서버센트 이벤트(Server Sent Events)(이하 SSE)
+
+#### SSE의 특징
+- Event Source 객체 사용
+- 서버에서 클라이언트로의 단방향 통신
+- 클라이언트에서 서버로 데이터 전송 불가
+
+#### 웹 소켓 vs SSE
+- 웹 소켓: 완전한 양방향 통신
+- SSE: 제한된 단방향 통신
+- 특정 사용 사례(주식 차트, SNS 업데이트)에서는 SSE로 충분
+
+#### 폴링 vs SSE vs 웹 소켓
+![Image](https://github.com/user-attachments/assets/74df207a-5496-49ec-a217-7bf58dd094fc)
+
+### 4. Socket.IO
+- 웹 소켓을 편리하게 사용할 수 있도록 도와주는 라이브러리
+- 웹 소켓을 지원하지 않는 IE9과 같은 브라우저에서는 알아서 웹 소켓 대신 폴링 방식을 사용해 실시간 데이터 전송을 가능하게 함.
+- 클라이언트 측에서 웹 소켓 연결이 끊겼다면 자동 재연결 기능
+- 채팅 구현을 위한 편리한 메서드 제공
+
+### 5. 프로젝트 세팅 - 서버
+#### 1) 필요한 패키지 설치
+```
+npm i cookie-parser dotenv express express-session morgan nunjucks && npm i -D nodemon
+```
+```
+npm i ws
+```
+
+#### 2) 웹소켓 8버전에서 변경된 사항
+
+1. <b>IP 주소 접근 방식 변경</b>
+- 웹소켓 7버전: `req.connection.remoteAddress`
+- 웹소켓 8버전: `req.socket.remoteAddress`
+- 웹소켓 8버전에서는 클라이언트의 IP 주소를 `req.socket.remoteAddress`로 접근해야 함.
+
+2. <b>메시지 형식 변경</b>
+- 웹소켓 7버전: 메시지가 <b>문자열 (string)</b>
+- 웹소켓 8버전: 메시지가 <b>버퍼 (Buffer)</b>
+- 웹소켓 8버전에서는 메시지가 Buffer로 오기 때문에, 이를 `toString()`으로 변환해 문자열로 처리해야 함.
+    ```
+    ws.on("message", (message) => {
+    console.log(message.toString()) // Buffer를 문자열로 변환
+    });
+    ```
+
+#### 3) 클라이언트 접속 해제 시 메모리 관리
+- 웹소켓에서 클라이언트가 접속을 해제하면, `ws.interval` 같은 주기적인 작업이 남을 수 있음.
+- 이럴 때 `clearInterval`로 해당 작업을 중단해야 메모리 누수를 방지할 수 있음.
+    ```
+    ws.on("close", () => {
+    console.log("클라이언트 접속 해제", ip);
+    clearInterval(ws.interval); // interval 작업 해제
+    });
+    ```
+
+#### 4) 웹 소켓 객체(ws)에 이벤트 리스너 세 개 연결함.
+- `message` : 클라이언트로부터 메시지가 왔을 때 발생
+    - `on` : 받을 때
+    - `send` : 보낼 때
+- `error` : 웹 소켓 연결 중 문제가 생겼을 때 발생
+- `close` : 클라이언트와 연결이 끊겼을 때 발생
+
+#### 5) 웹 소켓의 네 가지 상태
+- `CONNECTIING`(연결 중)
+- `OPEN`(열림) : 에러 없이 메시지를 보낼 수 있는 상태
+- `CLOSING`(닫는 중)
+- `CLOSED`(닫힘)
+
+### 6. 프로젝트 세팅 - 클라이언트
+
+#### 1) 이벤트 리스너
+
+- `new WebSocket(url)`: 웹 소켓 연결을 초기화
+- `onopen`: 웹 소켓 연결이 성공했을 때 호출됨.
+- `onmessage`: 서버로부터 메시지를 받았을 때 호출됨.
+- `send(data)`: 서버로 메시지를 보냄.
+- `onclose`: 웹 소켓 연결이 종료되었을 때 호출됨.
+- `onerror`: 웹 소켓에서 오류가 발생했을 때 호출함.
+
+#### 2) 시연
+| 클라이언트 <br> (chrome) | 서버 <br> (node.js) |
+|----------|----------|
+| ![Image 1](https://github.com/user-attachments/assets/ceb71095-7a79-4c2e-9d26-8940e9fbc6f0) | ![Image 2](https://github.com/user-attachments/assets/5747bdd4-755a-40f1-956f-0f9ec3553cbe) |
+
+
 ---
 
 ## Socket.IO 모듈 사용하기
