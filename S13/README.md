@@ -12,8 +12,14 @@
 
 ## 서버센트 이벤트 사용하기
 
+- 웹소켓은 양방향, SSE는 서버→클라이언트 일방향 통신
+- 온라인 경매에서는 정확한 서버 시간을 표시해야 함.
+- 클라이언트 시간은 신뢰할 수 없으므로 서버 시간을 사용하는 것이 중요함.
+
+![Image](https://github.com/user-attachments/assets/ea9f10fa-7f6f-4221-9dca-188be117dcfd)
+
+![Image](https://github.com/user-attachments/assets/bfbf766b-0eb2-46f5-ba1a-b7a9d158ada7)
+
 ---
 
 ## 스케줄링 구현하기
-
-
