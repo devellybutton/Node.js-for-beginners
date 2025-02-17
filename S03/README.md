@@ -521,7 +521,7 @@ console.log('현재 프로세스 CPU 사용량:', process.cpuUsage());
 
 ## url, dns, searchParams
 
-### 1. url
+### 1. url과 searchParams
 
 #### 1) WHATWG 방식 (현재 표준)
 ![image](https://github.com/user-attachments/assets/eebc33fe-a9b0-44a2-a170-f2b26cbd6d4c)
@@ -542,6 +542,7 @@ const parsedUrl = url.parse('http://example.com/path?search=test#hash');
 - 현재는 사용을 권장하지 않음
 
 #### 2) WHATWG URL 객체의 속성들
+- `#hash`는 브라우저만 인식함. 서버는 인식 못 함.
 ```
 const myURL = new URL('http://www.example.com/book/list.aspx?category=nodejs#anchor');
 
@@ -617,9 +618,46 @@ console.log(url.format(myURL));
 
 ### 2. dns
 
-### 3. searchParams
+#### 1) DNS 모듈 기본 사용
+- 최신 Node.js에서는 Promise 기반의 `dns/promises` 사용을 권장함.
+```
+import dns from 'dns/promises';  // Promise 기반 DNS API 사용
+```
 
+#### 2) 주요 메서드
+- `dns.lookup(domain)`
+    - 도메인의 IP 주소를 조회
+    - 운영체제의 hosts 파일 등을 포함한 시스템 설정 사용
+```
+const ip = await dns.lookup('example.com');
+```
 
+- `dns.resolve(domain, recordType)`
+    - DNS 서버에 직접 조회
+    - 다양한 레코드 타입 조회 가능:
+        - `A`: IPv4 주소
+        - `AAAA`: IPv6 주소
+        - `MX`: 메일 서버 정보
+        - `CNAME`: 별칭 도메인
+        - `TXT`: 텍스트 정보
+        - `ANY`: 모든 레코드 (일부 DNS에서 지원 안 할 수 있음)
+```
+// IPv4 주소 조회
+const aRecords = await dns.resolve('example.com', 'A');
+
+// 메일 서버 정보 조회
+const mxRecords = await dns.resolve('example.com', 'MX');
+
+// 별칭 도메인 조회
+const cnameRecords = await dns.resolve('www.example.com', 'CNAME');
+```
+
+<details>
+<summary>출력 결과</summary>
+
+![Image](https://github.com/user-attachments/assets/1fe6c596-9c9a-46f0-85d6-d9ad7662f880)
+
+</details>
 
 ---
 
