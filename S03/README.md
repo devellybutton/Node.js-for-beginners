@@ -521,7 +521,105 @@ console.log('현재 프로세스 CPU 사용량:', process.cpuUsage());
 
 ## url, dns, searchParams
 
+### 1. url
+
+#### 1) WHATWG 방식 (현재 표준)
 ![image](https://github.com/user-attachments/assets/eebc33fe-a9b0-44a2-a170-f2b26cbd6d4c)
+```
+const myURL = new URL('http://example.com/path?search=test#hash');
+```
+- 브라우저와 호환되는 웹 표준 방식
+- 노드 v7부터 추가됨
+- searchParams 객체 제공
+- URL은 노드 내장 객체 (require 불필요)
+
+#### 2) 레거시 Node.js 방식 (구방식)
+```
+const url = require('url');
+const parsedUrl = url.parse('http://example.com/path?search=test#hash');
+```
+- Node.js 초기부터 사용된 방식
+- 현재는 사용을 권장하지 않음
+
+#### 2) WHATWG URL 객체의 속성들
+```
+const myURL = new URL('http://www.example.com/book/list.aspx?category=nodejs#anchor');
+
+console.log(myURL);
+// URL {
+//   href: 전체 URL 문자열,
+//   origin: 프로토콜 + 호스트명,
+//   protocol: 프로토콜(http:, https:),
+//   username: 사용자이름,
+//   password: 비밀번호,
+//   host: 호스트명 + 포트,
+//   hostname: 호스트명,
+//   port: 포트번호,
+//   pathname: 경로,
+//   search: 쿼리스트링,
+//   searchParams: 쿼리스트링 객체,
+//   hash: 해시태그
+// }
+```
+<details>
+<summary><i>출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/640c13ee-8e81-41ff-b914-e8b8aeaa494e)
+
+</details>
+
+#### 3) searchParams 객체의 주요 메서드
+```
+const myURL = new URL('http://example.com?category=nodejs&category=javascript&page=1');
+
+// 값 조회
+myURL.searchParams.getAll('category');  // ['nodejs', 'javascript'] (모든 값)
+myURL.searchParams.get('page');         // '1' (단일 값)
+myURL.searchParams.has('page');         // true (존재 여부)
+
+// 키와 값 순회
+myURL.searchParams.keys();    // Iterator로 모든 키 조회
+myURL.searchParams.values();  // Iterator로 모든 값 조회
+
+// 값 추가/수정
+myURL.searchParams.append('filter', 'es3');  // 기존 값 유지하고 추가
+myURL.searchParams.append('filter', 'es5');  // 값 추가
+myURL.searchParams.set('filter', 'es6');     // 기존 값 전체 삭제 후 새로 설정
+
+// 값 삭제
+myURL.searchParams.delete('filter');
+
+// 문자열로 변환
+console.log(myURL.searchParams.toString());  // 'category=nodejs&category=javascript&page=1'
+myURL.search = myURL.searchParams.toString();  // URL 객체에 변경사항 적용
+```
+<details>
+<summary><i>출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/cd937530-dafb-4c00-ae5b-788710c19218)
+
+</details>
+
+#### 4) 특수한 경우 처리
+
+- 경로만 있는 URL 처리
+```
+// host 부분 없이 pathname만 있는 경우 두 번째 인수로 기본 URL 제공
+const pathURL = new URL('/book/list', 'http://example.com');
+```
+
+- URL 포맷팅
+```
+const url = require('url');
+// URL 객체를 문자열로 변환
+console.log(url.format(myURL));
+```
+
+### 2. dns
+
+### 3. searchParams
+
+
 
 ---
 
