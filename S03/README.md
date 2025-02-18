@@ -83,7 +83,7 @@ C:\Users\airyt\제로초교과서>node helloWorld.js
 - 파워셀보다는 cmd가 나아서 `cmd`로 실행하면 좋음.
 - 해당 경로에서 `node + 파일명` 입력
 <details>
-<summary>VSCode 터미널 출력 예시</summary>
+<summary><i>VSCode 터미널 출력 예시</i></summary>
 
 ![ezgif-5-bb447cd7bc](https://github.com/user-attachments/assets/76135f47-3d27-41f3-be11-b8c4918bdad8)
 
@@ -308,7 +308,7 @@ obj.method();
 - 이 작업은 효율적이지 않으며, 위험할 수 있기 때문에 일반적으로 사용하지 않음.
 
 <details>
-<summary>require 출력 결과</summary>
+<summary><i>require 출력 결과</i></summary>
 
 ![image](https://github.com/user-attachments/assets/6da19917-665e-4712-9787-c291a8d90d35)
 
@@ -387,7 +387,7 @@ console.log(A());  // '안녕하세요.'
 - `console.trace()`: 호출 스택을 추적하여 에러 발생 위치를 확인
 
 <details>
-<summary>예시 코드와 출력 결과</summary>
+<summary><i>예시 코드와 출력 결과</i></summary>
 
 ```
 console.log('이것은 일반 로그입니다');
@@ -443,7 +443,7 @@ clearInterval(intervalId);
     - `{ user, system }` 형식으로 반환되며, 각각 사용자 모드와 시스템 모드에서 소비한 CPU 시간
 
 <details>
-<summary>process 속성 출력 결과</summary>
+<summary><i>process 속성 출력 결과</i></summary>
 
 ```
 console.log('노드 버전:', process.version);
@@ -653,7 +653,7 @@ const cnameRecords = await dns.resolve('www.example.com', 'CNAME');
 ```
 
 <details>
-<summary>출력 결과</summary>
+<summary><i>출력 결과</i></summary>
 
 ![Image](https://github.com/user-attachments/assets/1fe6c596-9c9a-46f0-85d6-d9ad7662f880)
 
@@ -662,6 +662,147 @@ const cnameRecords = await dns.resolve('www.example.com', 'CNAME');
 ---
 
 ## crypto와 util
+
+### 1. 암호화 vs 복호화
+
+#### 1) 꼭 기억할 것
+- 비밀번호는 "암호화한다" (X)
+- 비밀번호는 "해시화한다" (O)
+
+#### 2) 차이점
+
+![Image](https://github.com/user-attachments/assets/ec45035d-cfec-4b16-b396-2c0c320138b4)
+
+| 구분         | 해시 (Hash)                                      | 암호화 (Encryption)                                 |
+|--------------|--------------------------------------------------|-----------------------------------------------------|
+| **특징**     | 평문을 암호처럼 만들지만 <b>되돌릴 수 없음</b>        | 평문을 암호로 만들고 <b>다시 되돌릴 수 있음</b>          |
+| **안전성**   | 알고리즘만 잘 선택하면 매우 안전               | 키 관리가 매우 중요                               |
+| **주요 용도**| 주로 비밀번호 저장에 사용                       | 민감 데이터 저장에 사용                          |
+| **성능**     | CPU 부하가 크므로 멀티스레드로 처리 필요       | 키 관리 및 암호화/복호화 과정에서 부하가 있음     |
+
+<details>
+<summary><i>hash.js 출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/06113972-6b13-4911-8377-fbea664941d4)
+
+</details>
+
+### 2. 해시화 구현
+
+#### 1) 기본 해시 예제
+```
+import crypto from 'crypto';
+
+// 해시화 (SHA512 사용)
+const hash = crypto.createHash('sha512')
+                  .update('비밀번호')
+                  .digest('base64');
+```
+
+#### 2) 현대적인 해시 방식 (PBKDF2)
+```
+const crypto = require('crypto');
+
+// salt 생성 (랜덤값)
+const salt = crypto.randomBytes(64).toString('base64');
+
+// CPU 집약적 작업이므로 자동으로 멀티스레드로 처리됨
+crypto.pbkdf2('비밀번호', salt, 100000, 64, 'sha512', (err, key) => {
+    const hashedPassword = key.toString('base64');
+    // DB에 hashedPassword와 salt 저장
+});
+```
+
+<details>
+<summary><i>pbkdf2.js 출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/3188ae6b-dcd3-4b10-bfbe-22b7cd1664ec)
+
+</details>
+
+### 3. 암호화 구현
+- 양방향 암호화 예제
+```
+const crypto = require('crypto');
+
+// 암호화 설정
+const algorithm = 'aes-256-cbc';
+const key = crypto.randomBytes(32);  // 32바이트 키
+const iv = crypto.randomBytes(16);   // 16바이트 초기화벡터
+
+// 암호화
+function encrypt(text) {
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return encrypted;
+}
+
+// 복호화
+function decrypt(encrypted) {
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
+```
+
+<details>
+<summary><i>cipher.js 출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/02c0e4c2-8cee-4b55-bf5d-ae67a529edf1)
+
+</details>
+
+
+### 4. 성능과 보안 고려사항
+
+#### 1) 멀티스레드 처리
+- 해시화는 CPU를 많이 사용
+- Node.js는 자동으로 스레드풀 사용
+- 성능 저하 없이 안전한 해시 가능
+```
+// 이 작업은 자동으로 멀티스레드로 처리됨
+crypto.pbkdf2('비밀번호', salt, 100000, 64, 'sha512', (err, key) => {
+    // 작업 완료 후 콜백
+});
+```
+
+#### 2) 안전한 알고리즘 선택
+
+- 👍 권장하는 알고리즘
+    - 해시: SHA512, PBKDF2, bcrypt, scrypt
+    - 암호화: AES-256-CBC, AES-256-GCM
+
+- 👎 사용하면 안 되는 알고리즘
+    - MD5
+    - SHA1
+    - DES
+
+### 5. 실무 보안 팁
+
+#### 1) 해시화 베스트 프랙티스
+- 항상 salt 사용하기
+- 충분한 반복횟수 설정 (최소 100,000회)
+- 안전한 알고리즘 선택
+- salt와 해시 모두 저장
+
+#### 2) 암호화 베스트 프랙티스
+- 키를 안전하게 보관 (환경변수 또는 키 관리 서비스)
+- IV(초기화 벡터) 랜덤하게 생성
+- 주기적인 키 순환
+- 암호화된 데이터와 키는 별도로 보관
+```
+// 환경변수 사용 예제
+const key = process.env.ENCRYPTION_KEY;
+const iv = process.env.ENCRYPTION_IV;
+```
+
+#### 3) 일반적인 보안 주의사항
+- 로그에 민감정보 출력 금지
+- 키를 코드에 하드코딩 금지
+- 에러 메시지에 민감한 정보 포함 금지
+- 정기적인 보안 감사 실시
 
 ---
 
