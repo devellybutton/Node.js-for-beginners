@@ -1115,8 +1115,6 @@ if (isMainThread) {
 - 성능 체크
 - 메모리 관리
 - 완료 핸들링
-<br>
-<br>
 
 6. 주의 사항
 - 모든 작업에 Worker Threads가 필요한 것은 아님
@@ -1135,6 +1133,46 @@ if (isMainThread) {
 ---
 
 ## child_process
+
+### 1. child_process란?
+- node.js에서 다른 프로그램이나 명령어를 실행할 때 사용하는 모듈
+- 현재 Node 프로세스 외에 새로운 프로세스를 생성하여 작업 수행
+- 다른 언어(Python, C++ 등)로 작성된 프로그램도 실행 가능
+
+### 2. exec
+- <b>셸</b>을 통해 명령어 실행
+- 결과를 버퍼에 저장했다가 한 번에 반환
+- 한글 사용 시: `cmd /c chcp 65001>nul && dir`
+
+### 3. spawn
+- 새 프로세스를 생성하여 스트림 형태로 데이터 처리
+- 셸을 사용하지 않음 (옵션으로 사용 가능: `{ shell: true }`)
+- 대용량 데이터 처리에 적합
+
+### 4. exec vs spawn의 차이점
+- `exec`: 셸 실행 → 명령어 수행 → 결과를 버퍼에 저장
+- `spawn`: 새 프로세스 생성 → 명령어 실행 → 스트림으로 데이터 전달
+- `spawn`이 메모리 관리면에서 더 효율적
+
+<details>
+<summary><i>node exec 출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/1b30854e-32b5-4ebc-a350-71d575955100)
+
+</details>
+
+<details>
+<summary><i>node spawn 출력 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/3864230b-03e9-4716-b315-2bf9c2c64295)
+
+</details>
+
+### 5. 주의사항
+- 외부 프로그램 실행 시 해당 프로그램이 설치되어 있어야 함
+- 보안을 위해 사용자 입력을 직접 실행하지 않도록 주의
+- 에러 처리 구현 필요
+- Windows와 Linux/Mac 명령어 차이 고려 (예: dir vs ls)
 
 ---
 
