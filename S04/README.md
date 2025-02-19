@@ -37,7 +37,7 @@
 - 서버가 실행되면 코드가 메모리에 로드가 되는데, 이때 메모리 상의 코드는 변경되지 않아서, <b>파일을 수정해도 실행 중인 프로세스</b>에는 반영되지 않음.
 
 <details>
-<summary>server1.js - 서버 실행 결과</summary>
+<summary><i>server1.js - 서버 실행 결과</i></summary>
 
 | 터미널에서 실행 | 실행 결과 |
 |----------------|----------|
@@ -45,7 +45,7 @@
 
 </details>
 <details>
-<summary>server1.js - 서버에서 강제 에러 발생 시키기</summary>
+<summary><i>server1.js - 서버에서 강제 에러 발생 시키기</i></summary>
 
 ![image](https://github.com/user-attachments/assets/94a571bd-0003-43b7-9612-92539897406b)
 
@@ -73,7 +73,7 @@
 - 단일 프로세스에서도 동시에 여러 요청을 처리할 수 있기 때문임.
 
 <details>
-<summary>서버 두 개 만들어서 동시에 실행하기</summary>
+<summary><i>서버 두 개 만들어서 동시에 실행하기</i></summary>
 
 ```
 const http = require("http");
@@ -112,7 +112,7 @@ server.on("listening", () => {
 </details>
 
 <details>
-<summary>server1.js 실행 결과</summary>
+<summary><i>server1.js 실행 결과</i></summary>
 
 ![image](https://github.com/user-attachments/assets/4a5dff24-220b-42d0-8d1c-278736c89e5e)
 
