@@ -1036,87 +1036,94 @@ if (isMainThread) {
 #### 소수 찾기 (멀티스레드)
 
 1. Worker Threads의 특성
+
 - 스레드 수 증가 ≠ 선형적 성능 향상
 - 각 CPU 코어와 작업 특성에 맞는 최적의 스레드 수 존재
 - 오버헤드 고려 필요 (스레드 생성, 통신, 관리 비용)
 
 2. 작업 분배와 결과 취합
-    ```
-    if (isMainThread) {
-        // 1. 작업 분배
-        const max = 10000000;
-        const threadCount = 8;
-        const range = Math.ceil((max - min) / threadCount);
 
-        // 2. 워커 생성 및 작업 할당
-        for (let i = 0; i < threadCount; i++) {
-            const startNum = min + (range * i);
-            threads.add(new Worker(__filename, {
-                workerData: { start: startNum, range }
-            }));
-        }
+   ```
+   if (isMainThread) {
+       // 1. 작업 분배
+       const max = 10000000;
+       const threadCount = 8;
+       const range = Math.ceil((max - min) / threadCount);
 
-        // 3. 결과 취합
-        for (let worker of threads) {
-            worker.on('message', (msg) => {
-                primes = primes.concat(msg);  // 결과 합치기
-            });
-        }
-    }
-    ```
+       // 2. 워커 생성 및 작업 할당
+       for (let i = 0; i < threadCount; i++) {
+           const startNum = min + (range * i);
+           threads.add(new Worker(__filename, {
+               workerData: { start: startNum, range }
+           }));
+       }
+
+       // 3. 결과 취합
+       for (let worker of threads) {
+           worker.on('message', (msg) => {
+               primes = primes.concat(msg);  // 결과 합치기
+           });
+       }
+   }
+   ```
 
 3. 에러 처리와 복구 로직
-    ```
-    if (isMainThread) {
-        for (let worker of threads) {
-            // 에러 처리
-            worker.on('error', (err) => {
-                console.error('Worker 에러:', err);
-                // 에러 발생한 작업 재시도 로직
-                retryWork(worker.workerData);
-            });
 
-            // 워커 종료 처리
-            worker.on('exit', (code) => {
-                if (code !== 0) {
-                    console.error('Worker 비정상 종료');
-                    // 복구 로직
-                    handleWorkerFailure();
-                }
-                // 정상 종료 처리
-                handleWorkerSuccess();
-            });
-        }
-    }
+   ```
+   if (isMainThread) {
+       for (let worker of threads) {
+           // 에러 처리
+           worker.on('error', (err) => {
+               console.error('Worker 에러:', err);
+               // 에러 발생한 작업 재시도 로직
+               retryWork(worker.workerData);
+           });
 
-    function retryWork(data) {
-        // 실패한 작업 재시도 로직
-        const newWorker = new Worker(__filename, { workerData: data });
-        threads.add(newWorker);
-    }
-    ```
+           // 워커 종료 처리
+           worker.on('exit', (code) => {
+               if (code !== 0) {
+                   console.error('Worker 비정상 종료');
+                   // 복구 로직
+                   handleWorkerFailure();
+               }
+               // 정상 종료 처리
+               handleWorkerSuccess();
+           });
+       }
+   }
+
+   function retryWork(data) {
+       // 실패한 작업 재시도 로직
+       const newWorker = new Worker(__filename, { workerData: data });
+       threads.add(newWorker);
+   }
+   ```
 
 4. 성능 최적화 팁
+
 - 균등한 작업 분배
 - 메모리 사용량 고려
 - 스레드 간 통신 최소화
-    ```
-    // 다양한 스레드 수로 테스트 실행
-    const testThreadCounts = [2, 4, 6, 8, 12, 16];
 
-    for (const count of testThreadCounts) {
-        console.time(`Test with ${count} threads`);
-        // 테스트 실행
-        console.timeEnd(`Test with ${count} threads`);
-    }
-    ```
+  ```
+  // 다양한 스레드 수로 테스트 실행
+  const testThreadCounts = [2, 4, 6, 8, 12, 16];
+
+  for (const count of testThreadCounts) {
+      console.time(`Test with ${count} threads`);
+      // 테스트 실행
+      console.timeEnd(`Test with ${count} threads`);
+  }
+  ```
 
 5. 실무 적용 시 체크리스트
+
 - 성능 체크
 - 메모리 관리
 - 완료 핸들링
 
 6. 주의 사항
+
 - 모든 작업에 Worker Threads가 필요한 것은 아님
 - I/O 작업은 기본 비동기 처리 사용이 더 효율적
 - 메모리 공유 시 동기화 문제 주의
@@ -1135,21 +1142,25 @@ if (isMainThread) {
 ## child_process
 
 ### 1. child_process란?
+
 - node.js에서 다른 프로그램이나 명령어를 실행할 때 사용하는 모듈
 - 현재 Node 프로세스 외에 새로운 프로세스를 생성하여 작업 수행
 - 다른 언어(Python, C++ 등)로 작성된 프로그램도 실행 가능
 
 ### 2. exec
+
 - <b>셸</b>을 통해 명령어 실행
 - 결과를 버퍼에 저장했다가 한 번에 반환
 - 한글 사용 시: `cmd /c chcp 65001>nul && dir`
 
 ### 3. spawn
+
 - 새 프로세스를 생성하여 스트림 형태로 데이터 처리
 - 셸을 사용하지 않음 (옵션으로 사용 가능: `{ shell: true }`)
 - 대용량 데이터 처리에 적합
 
 ### 4. exec vs spawn의 차이점
+
 - `exec`: 셸 실행 → 명령어 수행 → 결과를 버퍼에 저장
 - `spawn`: 새 프로세스 생성 → 명령어 실행 → 스트림으로 데이터 전달
 - `spawn`이 메모리 관리면에서 더 효율적
@@ -1169,6 +1180,7 @@ if (isMainThread) {
 </details>
 
 ### 5. 주의사항
+
 - 외부 프로그램 실행 시 해당 프로그램이 설치되어 있어야 함
 - 보안을 위해 사용자 입력을 직접 실행하지 않도록 주의
 - 에러 처리 구현 필요
@@ -1179,6 +1191,7 @@ if (isMainThread) {
 ## 파일 시스템 사용하기
 
 ### 1. fs 모듈 기본 개념
+
 - 파일 시스템에 접근하여 파일/폴더의 생성, 삭제, 읽기, 쓰기 수행
 - 기본적으로 콜백 기반이지만, Promise 기반으로도 사용 가능
 
@@ -1192,9 +1205,11 @@ if (isMainThread) {
 </details>
 
 ### 2. 동기와 비동기 메서드 특징
+
 - [블로킹/논블로킹, 동기/비동기 이해하기](blocking-nonblocking/README.md)
 
 #### 1) 비동기(Async) 메서드
+
 - 메서드 이름: readFile, writeFile 등
 - 백그라운드에 작업을 요청하고 즉시 다음 작업으로 넘어감
 - 작업 완료 시 콜백 함수 실행
@@ -1202,6 +1217,7 @@ if (isMainThread) {
 - 여러 요청을 동시에 처리 가능
 
 #### 2) 동기(Sync) 메서드
+
 - 메서드 이름 끝에 Sync 붙음 (예: readFileSync)
 - 파일 작업이 완료될 때까지 다음 코드로 넘어가지 않음
 - 작업 결과를 반환값으로 받음
@@ -1209,6 +1225,7 @@ if (isMainThread) {
 - 요청이 많을 경우 병목 현상 발생
 
 ### 3. 중요한 특징:
+
 ```
 // 비동기는 순서 보장이 안됨
 fs.readFile('file1'); // 1
@@ -1218,10 +1235,10 @@ fs.readFile('file3'); // 3
 ```
 
 ### 4. 비동기 순서 보장 방법
+
 - 콜백 중첩 (콜백 지옥 발생 가능)
 - Promise 체이닝
 - async/await 사용
-
 
 <details>
 <summary><i>async.js 실행 결과</i></summary>
@@ -1245,11 +1262,13 @@ fs.readFile('file3'); // 3
 </details>
 
 ## 5. 파일 경로 주의사항
+
 - [파일 경로 주의사항](file_path_instructions/README.md)
 - 파일 경로는 실행 디렉터리 기준
 - 상대 경로 사용 시 node 명령어 실행 위치 기준
 
 ## 6. 데이터 처리
+
 - 파일 읽기 결과는 `Buffer` 형식으로 제공
 - 문자열로 변환하려면 `toString()` 메서드 사용 필요
 
@@ -1257,21 +1276,24 @@ fs.readFile('file3'); // 3
 
 ## 버퍼와 스트림 이해하기
 
-| 버퍼 | 스트림  |
-|---------|---------|
+| 버퍼                                                                                      | 스트림                                                                                    |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | ![Image](https://github.com/user-attachments/assets/c21c7ce1-2945-4fea-991e-bb243a940107) | ![Image](https://github.com/user-attachments/assets/368287ff-4586-4ac5-9968-301c56807142) |
 
 ### 1. 버퍼 (Buffer)
+
 - 개념: 일정한 크기로 모아두는 데이터
 - 메모리에 파일 크기만큼 공간을 할당하여 저장
 - 메모리 효율성이 낮음 (100MB 파일 = 100MB 메모리 사용)
 
 #### 버퍼의 한계
+
 - 대용량 파일 처리 시 메모리 문제 (100MB 파일 10개 = 1GB 메모리)
 - 서버 환경에서 동시 접속자 수에 따른 메모리 부하
 - 전체 데이터를 버퍼에 쓴 후에만 다음 작업 가능
 
 #### 주요 Buffer 메서드
+
 - `Buffer.from()`: 문자열을 버퍼로 변환
 - `Buffer.toString()`: 버퍼를 문자열로 변환
 - `Buffer.concat()`: 버퍼들을 하나로 합침
@@ -1292,6 +1314,7 @@ fs.readFile('file3'); // 3
 - 예: 100MB 파일을 1MB 크기로 100번 나눠 전송
 
 #### 주요 스트림 메서드
+
 - `createReadStream()`: 읽기 스트림 생성
 - `createWriteStream()`: 쓰기 스트림 생성
 
@@ -1314,12 +1337,14 @@ fs.readFile('file3'); // 3
 ## pipe와 스트림 메모리 효율 확인
 
 ### 1. 파이프 (Pipe)
+
 - 개념: 스트림 사이를 연결하는 방식
 - 읽기 스트림 → 쓰기 스트림으로 데이터 전달
 - 여러 개의 스트림을 파이프로 연결 가능
 - 용도: 파일 복사, 압축, 파일 스트리밍 등
 
 ### 2. 메모리 사용 비교
+
 - 버퍼 방식: 1GB 파일 복사 시 1GB 메모리 사용
 - 스트림 방식: 1GB 파일 복사 시 64MB 정도만 사용
   - 파일을 작은 조각으로 나누어 처리
@@ -1391,6 +1416,129 @@ fs.readFile('file3'); // 3
 
 ## 스레드풀과 커스텀 이벤트
 
+
+### 1. 스레드풀
+- Node.js에서 특정 작업을 백그라운드에서 처리하기 위한 스레드들의 집합
+
+#### 주요 특징
+- 기본적으로 4개의 스레드로 구성
+- 스레드 풀을 사용하는 대표적인 모듈: `fs`, `crypto`, `zlib`, `dns.lookup`
+- `UV_THREADPOOL_SIZE` 환경변수로 스레드 풀 크기 조절 가능
+- 동시에 처리되는 작업은 스레드 풀의 크기만큼만 가능
+- 작업의 실행 순서는 보장되지 않음
+
+### 2. 메인 스레드와 스레드풀 비교
+- 메인 스레드와 스레드 풀은 서로 다른 공간에서 동작하면서 필요할 때 통신하는 구조
+  - 메인 스레드에서 작업 요청 → 스레드 풀로 전달
+  - 작업 완료 후 결과 → 메인 스레드의 콜백 큐로 전달
+  - 이벤트 루프는 계속 돌면서 콜백 큐를 모니터링하고, 콜백 큐 확인 → 작업 있으면 실행 → 다시 큐 확인 → 반복
+
+  ![Image](https://github.com/user-attachments/assets/8873add8-9406-40dd-a706-fb19fef519a0)
+
+| **메인 스레드**                             | **스레드 풀**                                  |
+|--------------------------------------------|-----------------------------------------------|
+| • 이벤트 루프가 실행되는 곳               | • CPU 집약적인 작업을 처리하는 별도의 스레드 풀    |
+| • 자바스크립트 코드 실행 및 콜백 처리        | • 기본적으로 4개의 워커 스레드가 작업을 병렬로 처리  |
+| • 비동기 작업을 관리하고, 콜백을 처리       | • 파일 I/O, 암호화, 압축 작업 등 시간이 오래 걸리는 작업을 처리  |
+| • 하나의 스레드에서 실행                   | • 여러 개의 독립적인 스레드에서 실행            |
+| • 비동기 작업의 이벤트를 감지하고 관리      | • 메인 스레드의 작업을 차단하지 않고 백그라운드에서 처리  |
+| • 블로킹 작업이 있을 경우 앱 전체가 멈출 수 있음 | • 메인 스레드를 차단하지 않고 작업을 백그라운드에서 처리  |
+
+
+<details>
+<summary><i>threadpool.js 실행 결과</i></summary>
+
+- 1~4와 5~8이 그룹으로 묶여져 있고, 5~8이 1~4보다 시간이 더 소요됨. 
+  - 기본적인 스레드 풀의 개수가 네 개이기 때문임. 
+- 스레드 풀이 네 개이므로 처음 네 개의 작업이 동시에 실행되고, 그것들이 종료되면 다음 네 개의 작업이 실행
+
+![Image](https://github.com/user-attachments/assets/50d6d015-dae6-4f9b-a833-337526388f04)
+
+</details>
+
+### 2. 커스텀 이벤트
+
+- Node.js의 이벤트 처리는 `EventEmitter` 클래스를 통해 구현됨.
+
+#### 주요 메서드
+- `on()`, `addListener()`: 이벤트 리스너 등록
+- `emit()`: 이벤트 발생시키기
+- `once()`: 한 번만 실행되는 이벤트 리스너 등록
+- `removeListener()`, `off()`: 특정 리스너 제거
+- `removeAllListeners()`: 모든 리스너 제거
+- `listenerCount()`: 등록된 리스너 수 확인
+
+<details>
+<summary><i>event.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/0711b360-d038-4745-bf59-1d70f0df0ba9)
+
+</details>
+
 ---
 
 ## 에러 처리하기
+
+### 1. 기본적인 에러 처리 패턴
+| **코드 상황**            | **에러 처리 방법**                           | **결과**                                                    |
+|--------------------------|--------------------------------------------|-------------------------------------------------------------|
+| **error1.js**            | `throw new Error()` <br> `try-catch`로 감싸기 | • 프로세스 계속 실행 <br> • 에러 로그만 출력                |
+| **error2.js**            | 노드 내장 모듈 에러 (예: `fs.unlink()`) <br> 콜백 함수의 `err` 매개변수로 처리 | • 프로세스 계속 실행 <br> • 에러 자동 처리됨               |
+| **error3.js**            | 프로미스 에러 <br> `fs.promises.unlink().catch()`로 처리 | • Node.js 16부터 필수 <br> • 처리하지 않으면 프로세스 종료 |
+| **error4.js**            | 예측 불가능한 에러 <br> `process.on('uncaughtException')` | • 마지막 수단으로만 사용 <br> • 에러 기록 후 종료 권장     |
+
+<details>
+<summary><i>error1.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/4727a26b-3ec9-4d47-be8c-44f46d43237a)
+
+</details>
+
+<details>
+<summary><i>error2.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/8aed871b-1418-45fd-b754-ce6ae2887c00)
+
+</details>
+
+
+<details>
+<summary><i>error3.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/7ac58740-5a71-4228-b15d-b261e6d8b7c4)
+
+</details>
+
+
+<details>
+<summary><i>error4.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/114d7249-811f-4af3-8e57-e24272d1e236)
+
+</details>
+
+### 2. 주요 에러 유형과 해결방법
+
+#### 명령어 관련
+- `node: command not found`: 환경 변수 설정 확인
+- `Cannot find module`: 모듈 설치 여부 확인
+
+#### 메모리 관련
+- `JavaScript heap out of memory`: 메모리 부족
+  - 해결: `node --max-old-space-size=4096` 로 메모리 증가
+
+#### 포트/프로세스 관련
+- `EADDRINUSE`: 포트 중복 사용
+- `EACCES/EPERM`: 권한 부족
+
+#### 기타 일반적 에러
+- `ECONNREFUSED`: 연결 거부
+- `ETIMEOUT`: 응답 시간 초과
+- `ENOENT`: 파일/디렉토리 없음
+
+### 3. 에러 처리 전략
+- 예상 가능한 에러는 `try-catch`로 처리
+- 프로미스 에러는 반드시 `.catch()` 사용
+- 내장 모듈 에러는 자체 처리 메커니즘 활용
+- `uncaughtException`은 최후의 수단으로만 사용
+- 에러 발생 시 철저한 로깅 필요
