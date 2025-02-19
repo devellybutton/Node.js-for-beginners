@@ -1178,6 +1178,81 @@ if (isMainThread) {
 
 ## 파일 시스템 사용하기
 
+### 1. fs 모듈 기본 개념
+- 파일 시스템에 접근하여 파일/폴더의 생성, 삭제, 읽기, 쓰기 수행
+- 기본적으로 콜백 기반이지만, Promise 기반으로도 사용 가능
+
+<details>
+<summary><i>readFile.js, writeFile.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/760c548d-aa74-4e1b-99cc-13bc0e822823)
+
+![Image](https://github.com/user-attachments/assets/4fc22e98-c15b-4d28-9daa-f1f310afb076)
+
+</details>
+
+### 2. 동기와 비동기 메서드 특징
+- [블로킹/논블로킹, 동기/비동기 이해하기](blocking-nonblocking/README.md)
+
+#### 1) 비동기(Async) 메서드
+- 메서드 이름: readFile, writeFile 등
+- 백그라운드에 작업을 요청하고 즉시 다음 작업으로 넘어감
+- 작업 완료 시 콜백 함수 실행
+- 성능이 좋고 실무에서 권장됨
+- 여러 요청을 동시에 처리 가능
+
+#### 2) 동기(Sync) 메서드
+- 메서드 이름 끝에 Sync 붙음 (예: readFileSync)
+- 파일 작업이 완료될 때까지 다음 코드로 넘어가지 않음
+- 작업 결과를 반환값으로 받음
+- 성능 문제로 초기화 용도로만 사용 권장
+- 요청이 많을 경우 병목 현상 발생
+
+### 3. 중요한 특징:
+```
+// 비동기는 순서 보장이 안됨
+fs.readFile('file1'); // 1
+fs.readFile('file2'); // 2
+fs.readFile('file3'); // 3
+// 실행 순서가 1,2,3이 아닐 수 있음
+```
+
+### 4. 비동기 순서 보장 방법
+- 콜백 중첩 (콜백 지옥 발생 가능)
+- Promise 체이닝
+- async/await 사용
+
+
+<details>
+<summary><i>async.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/f0edae2b-7908-4eb2-9788-45d3730bc59b)
+
+</details>
+
+<details>
+<summary><i>sync.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/b520dad9-e3ba-4494-ac69-96fa1922d0bd)
+
+</details>
+
+<details>
+<summary><i>asyncOrder.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/ddd2e5dd-982c-45e6-952d-5b70511afe33)
+
+</details>
+
+## 5. 파일 경로 주의사항
+- [파일 경로 주의사항](file_path_instructions/README.md)
+- 파일 경로는 실행 디렉터리 기준
+- 상대 경로 사용 시 node 명령어 실행 위치 기준
+
+## 6. 데이터 처리
+- 파일 읽기 결과는 `Buffer` 형식으로 제공
+- 문자열로 변환하려면 `toString()` 메서드 사용 필요
+
 ---
 
 ## 버퍼와 스트림 이해하기
