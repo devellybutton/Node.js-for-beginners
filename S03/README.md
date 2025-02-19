@@ -1257,9 +1257,135 @@ fs.readFile('file3'); // 3
 
 ## 버퍼와 스트림 이해하기
 
+| 버퍼 | 스트림  |
+|---------|---------|
+| ![Image](https://github.com/user-attachments/assets/c21c7ce1-2945-4fea-991e-bb243a940107) | ![Image](https://github.com/user-attachments/assets/368287ff-4586-4ac5-9968-301c56807142) |
+
+### 1. 버퍼 (Buffer)
+- 개념: 일정한 크기로 모아두는 데이터
+- 메모리에 파일 크기만큼 공간을 할당하여 저장
+- 메모리 효율성이 낮음 (100MB 파일 = 100MB 메모리 사용)
+
+#### 버퍼의 한계
+- 대용량 파일 처리 시 메모리 문제 (100MB 파일 10개 = 1GB 메모리)
+- 서버 환경에서 동시 접속자 수에 따른 메모리 부하
+- 전체 데이터를 버퍼에 쓴 후에만 다음 작업 가능
+
+#### 주요 Buffer 메서드
+- `Buffer.from()`: 문자열을 버퍼로 변환
+- `Buffer.toString()`: 버퍼를 문자열로 변환
+- `Buffer.concat()`: 버퍼들을 하나로 합침
+- `Buffer.alloc()`: 빈 버퍼 생성
+
+<details>
+<summary><i>buffer.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/755a3385-6b7c-4f28-a3ae-de36b8659327)
+
+</details>
+
+### 2. 스트림 (Stream)
+
+- 개념: 데이터를 조각내어 여러 번에 걸쳐 전송
+- 메모리 효율적 (1MB 버퍼로 100MB 파일 전송 가능)
+- 버퍼의 메모리 한계 극복
+- 예: 100MB 파일을 1MB 크기로 100번 나눠 전송
+
+#### 주요 스트림 메서드
+- `createReadStream()`: 읽기 스트림 생성
+- `createWriteStream()`: 쓰기 스트림 생성
+
+<details>
+<summary><i>createReadStream.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/c70e5701-4f90-44b9-bb41-259b1e6b892a)
+
+</details>
+
+<details>
+<summary><i>createWriteStream.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/9a66f5bb-d617-40a9-9d0c-da1fd276b060)
+
+</details>
+
 ---
 
 ## pipe와 스트림 메모리 효율 확인
+
+### 1. 파이프 (Pipe)
+- 개념: 스트림 사이를 연결하는 방식
+- 읽기 스트림 → 쓰기 스트림으로 데이터 전달
+- 여러 개의 스트림을 파이프로 연결 가능
+- 용도: 파일 복사, 압축, 파일 스트리밍 등
+
+### 2. 메모리 사용 비교
+- 버퍼 방식: 1GB 파일 복사 시 1GB 메모리 사용
+- 스트림 방식: 1GB 파일 복사 시 64MB 정도만 사용
+  - 파일을 작은 조각으로 나누어 처리
+  - 메모리 효율성 크게 향상
+
+<details>
+<summary><i>pipe.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/fdcc20a4-5908-48ea-9c04-bc8b23b51778)
+
+</details>
+
+<details>
+<summary><i>gzip.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/4d156238-d056-4024-b7fb-ccdb2eb87687)
+
+</details>
+
+<details>
+<summary><i>실습 중단</i></summary>
+
+- 대용량파일 관련 코드는 실행할 때마다 vsCode가 중단되므로 실습하지 않음.
+
+![Image](https://github.com/user-attachments/assets/ca9b7327-7d6b-4547-b652-2cf33ad91346)
+
+</details>
+
+### 3. fs 모듈의 주요 메서드 파일 처리
+
+- `access()`: 파일 접근 권한 체크
+- `mkdir()`: 폴더 생성
+- `open()`: 파일 열기
+- `rename()`: 파일명 변경
+- `unlink()`: 파일 삭제
+- `rmdir()`: 폴더 삭제
+- `copyFile()`: 파일 복사
+- `watch()`: 파일 변경 감시
+
+<details>
+<summary><i>fsCreate.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/61aa01d3-49d6-4d56-85a8-61c99d2dec1b)
+
+</details>
+
+<details>
+<summary><i>fsDelete.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/9d73c852-5ea0-46f1-9fae-68e3a61b1fd2)
+
+</details>
+
+<details>
+<summary><i>copyFile.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/8b654594-c79d-4718-9a3a-244660b82d22)
+
+</details>
+
+<details>
+<summary><i>watch.js 실행 결과</i></summary>
+
+![Image](https://github.com/user-attachments/assets/038414ca-cd65-4130-9537-e24126ec9eba)
+
+</details>
 
 ---
 

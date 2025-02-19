@@ -1,0 +1,5 @@
+# Node modules
+node_modules/
+
+# Files with 'big' in the name
+*big*
