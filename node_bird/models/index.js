@@ -25,7 +25,7 @@ fs.readdirSync(__dirname) // 현재 폴더의 모든 파일을 조회
   .forEach((file) => {
     // 해당 파일의 모델 불러와서 init
     const model = require(path.join(__dirname, file));
-    console.log(file, model.name);
+    // console.log(file, model.name);
     db[model.name] = model;
     model.initiate(sequelize);
   });
