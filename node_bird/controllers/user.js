@@ -3,7 +3,7 @@ const userService = require("../services/user");
 
 exports.follow = async (req, res, next) => {
   try {
-    const result = await userService.follow(req.params.id, req.params.id);
+    const result = await userService.follow(req.user.id, req.params.id);
     if (result === "ok") {
       res.send("success");
     } else if (result === "no user") {
