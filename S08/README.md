@@ -6,7 +6,7 @@
 4. [CRUD 작업하기](#crud-작업하기)
 5. [MongoDB 연결 과정 트러블슈팅](#mongodb-연결-과정-트러블슈팅)
 6. [몽구스 사용하기](#몽구스-사용하기)
-7. [몽구스 스키마 사용하기](#몽구스-스키마-사용하기)
+7. [몽구스 스키마 정의하기](#몽구스-스키마-정의하기)
 8. [몽구스 실전 프로젝트](#몽구스-실전-프로젝트)
 
 ---
@@ -313,10 +313,99 @@ db.users.deleteOne({ name: 'nero' })
 
 ## 몽구스 사용하기
 
+### 1. MongoDB와 Mongoose
+
+#### 1) ODM (Object Document Mapping)
+- MySQL의 ORM과 비슷한 개념으로, <b>MongoDB에서는 ODM이라고 부름</b>
+- MongoDB는 테이블 대신 다큐먼트를 사용하므로 `ORM`이 아닌 `ODM`이라는 용어 사용
+- 대표적인 ODM으로 Mongoose가 있음
+
+#### 2) Mongoose가 제공하는 주요 기능
+- <b>스키마(Schema) 기능</b>
+  - MongoDB는 자유로운 데이터 구조가 특징이지만, 이로 인한 문제 발생 가능
+  - Mongoose는 서버 단에서 데이터 검증을 위한 스키마 기능 제공
+  - 잘못된 타입의 데이터나 필드 입력 방지
+- <b>populate() 메서드</b>
+  - MySQL의 JOIN과 유사한 기능 제공
+  - 관계가 있는 데이터를 쉽게 가져올 수 있음
+  - 별도의 쿼리로 데이터를 가져오지만 자동으로 처리됨
+- <b>프로미스 지원</b>
+  - ES2015 프로미스 문법 지원
+  - 가독성 높은 쿼리 빌더 제공
+
+### 2. Mongoose 연결하기
+#### 1) 기본 연결 주소 형식
+  ```
+  mongodb://[username:password@]host[:port][/[database][?options]]
+  ```
+#### 2) 연결 예시
+  ```
+  // schemas/index.js
+  mongoose.connect('mongodb://root:1234@localhost:27017/admin', {
+    dbName: 'nodejs'
+  })
+  ```
+
 ---
 
-## 몽구스 스키마 사용하기
+## 몽구스 스키마 정의하기
+
+### 1. 기본 스키마 구조
+```
+const { Schema } = mongoose;
+const userSchema = new Schema({
+  field: {
+    type: Type,
+    required: Boolean,
+    unique: Boolean
+  }
+});
+```
+
+### 2. 지원하는 데이터 타입
+- String, Number, Date, Buffer
+- Boolean, Mixed, ObjectId, Array
+
+### 3. 컬렉션 이름 규칙
+- 기본적으로 모델 이름의 소문자 복수형으로 생성
+  - 예: 'User' → 'users', 'Comment' → 'comments'
+- 커스텀 컬렉션명 지정 가능
+  ```
+  mongoose.model('User', userSchema, 'custom_collection_name')
+  ```
 
 ---
 
 ## 몽구스 실전 프로젝트
+
+### 1. 기본 CRUD 작업
+
+#### 1) 조회 (Read)
+- MongoDB의 `db.users.find({})`는 Mongoose에서 `User.find({})`로 사용
+- 프로미스를 기본 지원하므로 async/await 사용 가능
+
+#### 2) 생성 (Create)
+- `Model.create()` 메서드 사용
+- 스키마에 부합하지 않는 데이터 입력 시 자동으로 에러 발생
+- `_id` 필드는 자동 생성
+
+#### 3) 수정 (Update)
+- `Model.update()` 메서드 사용
+- 주의: MongoDB와 달리 `$set` 연산자 불필요
+- 입력한 필드만 수정되어 전체 문서 수정 실수 방지
+
+#### 4) 삭제 (Delete)
+- `Model.remove()` 메서드 사용
+
+### 2. populate() 기능
+- 다른 컬렉션의 문서를 참조할 때 사용
+- 실제 JOIN과는 다르게 작동 (별도 쿼리로 실행)
+- 필드의 ObjectId를 실제 문서로 치환
+  ```
+  // 스키마 정의 시 ref 옵션 필요
+  commenter: {
+    type: ObjectId,
+    required: true,
+    ref: 'User'  // 참조할 모델
+  }
+  ```
