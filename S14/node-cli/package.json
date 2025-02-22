@@ -1,11 +1,12 @@
 {
-    "name":"node-cli",
-    "version":"0.0.1",
-    "description": "nodejs cli program",
-    "main":"index.js",
-    "author":"human",
-    "license":"ISC",
-    "bin": {
-        "cli":"./index.js"
-    }
+  "name": "node-cli",
+  "version": "0.0.1",
+  "description": "nodejs cli program",
+  "main": "index.js",
+  "author": "human",
+  "license": "ISC",
+  "bin": {
+    "cli": "./index.js",
+    "cli-template": "./template.js"
+  }
 }
