@@ -11,6 +11,7 @@ const {
   createGood,
   renderAuction,
   bid,
+  renderList,
 } = require("../controllers");
 
 const router = express.Router();
@@ -21,9 +22,7 @@ router.use((req, res, next) => {
 });
 
 router.get("/", renderMain);
-
 router.get("/join", isNotLoggedIn, renderJoin);
-
 router.get("/good", isLoggedIn, renderGood);
 
 try {
@@ -47,9 +46,10 @@ const upload = multer({
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
 });
-router.post("/good", isLoggedIn, upload.single("img"), createGood);
 
+router.post("/good", isLoggedIn, upload.single("img"), createGood);
 router.get("/good/:id", isLoggedIn, renderAuction); // 입찰 화면
 router.post("/good/:id/bid", isLoggedIn, bid); // 입찰
+router.get("/list", isLoggedIn, renderList);
 
 module.exports = router;
