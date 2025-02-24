@@ -122,7 +122,12 @@ const typeAnswer = (answer) => {
 
 const program = () => {
   if (!type || !name) {
-    console.error("사용 방법: cli html|express-router 파일명 [생성 경로]");
+    rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    console.clear();
+    rl.question("어떤 템플릿이 필요하십니까? ", typeAnswer);
   } else {
     makeTemplate();
   }

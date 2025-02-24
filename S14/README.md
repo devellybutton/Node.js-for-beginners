@@ -62,7 +62,8 @@ console.log("Hello CLI", process.argv);
 ```
 
 3. `npm i - g` : cli 명령어를 전역으로 설치하는 명령어
-    - `npm rm -g` : 삭제
+   - `package.json`이 수정되면 `npm i -g`로 다시 설치해줘야됨.
+   - `npm rm -g` : 삭제
 4. `npx cli` : npx가 cli라는 이름의 실행 가능한 프로그램을 찾아서 index.js를 실행하는 것
 
 <details>
@@ -128,35 +129,81 @@ rl.question("예제가 재미있습니까? (y/n)", (answer) => {
 </details>
 
 #### 1) 윈도우에서는 `dir` 명령어로 `cli`가 보이지 않는게 정상임.
+
 - 강의에서는 `cli` 입력시 아래와 같이 나옴.
-    ![Image](https://github.com/user-attachments/assets/7b66e59d-0726-4cba-8797-dc7c81e2c30a)
+  ![Image](https://github.com/user-attachments/assets/7b66e59d-0726-4cba-8797-dc7c81e2c30a)
 - 내 컴퓨터(윈도우)에서는 아래와 같이 나옴.
-    ![Image](https://github.com/user-attachments/assets/959de918-1ee2-41b0-8162-86f9aad17307)
+  ![Image](https://github.com/user-attachments/assets/959de918-1ee2-41b0-8162-86f9aad17307)
 
 #### 2) 윈도우와 유닉스/리눅스 차이
+
 - <b>Unix/Linux의 경우</b>
-    - CLI 명령어들이 `/usr/local/bin` 같은 실제 디렉토리에 심볼릭 링크로 설치됨
-    - ls 명령어로 확인 가능
+  - CLI 명령어들이 `/usr/local/bin` 같은 실제 디렉토리에 심볼릭 링크로 설치됨
+  - ls 명령어로 확인 가능
 - <b>Windows의 경우</b>
-    - CLI 명령어들이 `%AppData%\npm` 폴더에 설치됨
-    - 실제로는 `.cmd` 파일로 만들어짐
-    - dir로는 직접 보이지 않음
+  - CLI 명령어들이 `%AppData%\npm` 폴더에 설치됨
+  - 실제로는 `.cmd` 파일로 만들어짐
+  - dir로는 직접 보이지 않음
 
 #### 3) Windows에서 CLI 명령어 확인하는 방법
-- 전역 설치된 패키지 확인
-    ```
-    npm ls -g
-    ```
-    ![Image](https://github.com/user-attachments/assets/51a8ad2a-0ed3-4361-b3ab-abfa84bbf625)
-- AppData\Roaming\npm 폴더 확인
-    ```
-    dir %AppData%\npm
 
-    # PowerShell에서는 $env:APPDATA 사용
-    dir "$env:APPDATA\npm"
-    ```
-    ![Image](https://github.com/user-attachments/assets/74ee2e67-8f28-48a5-9fdf-bcd872ac3865)
+- 전역 설치된 패키지 확인
+
+  ```
+  npm ls -g
+  ```
+
+    <details>
+    <summary><i>실행 결과</i></summary>
+
+  ![Image](https://github.com/user-attachments/assets/51a8ad2a-0ed3-4361-b3ab-abfa84bbf625)
+
+    </details>
+
+- AppData\Roaming\npm 폴더 확인
+
+  ```
+  dir %AppData%\npm
+
+  # PowerShell에서는 $env:APPDATA 사용
+  dir "$env:APPDATA\npm"
+  ```
+
+    <details>
+    <summary><i>실행 결과</i></summary>
+
+  ![Image](https://github.com/user-attachments/assets/74ee2e67-8f28-48a5-9fdf-bcd872ac3865)
+
+    </details>
 
 ---
 
 ## Commander, Inquirer 사용하기
+
+### npm 패키지
+
+```
+npm i commander@9 inquirer@8 chalk
+```
+#### 1) Commander
+- CLI 명령어 인터페이스 구축 도구
+- 옵션, 버전, 도움말 등 편리한 CLI 구축
+- 예: `program.option('-n, --name <name>', '설명')`
+
+#### 2) Inquirer
+- 대화형(Interactive) CLI 인터페이스 도구
+- 질문/답변 형식의 깔끔한 인터페이스 제공
+- list, checkbox, input 등 다양한 입력 방식
+
+#### 3) Chalk
+- CLI 텍스트 스타일링 도구
+- 색상, 굵기, 밑줄 등 꾸미기 가능
+- 예: `chalk.red('에러!'), chalk.green('성공!')`
+
+### 프로그램 흐름
+1. 명령어 인자 확인
+2. 인자 부족 시 대화형 모드 시작
+3. 템플릿 타입 확인 (html/express-router)
+4. 파일명 입력 받기
+5. 저장 경로 설정 (선택)
+6. 템플릿 파일 생성
