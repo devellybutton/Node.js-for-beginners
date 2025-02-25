@@ -279,3 +279,5 @@ npx pm2 start server.js -i [프로세스 수]
 ---
 
 ## AWS에 배포하기
+
+- [배포한 소스, 단계 정리](https://github.com/devellybutton/Node.js-for-beginners_ch15_nodebird?tab=readme-ov-file#nodebird-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-aws-lightsail%EB%A1%9C-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
