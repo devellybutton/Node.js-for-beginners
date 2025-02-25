@@ -4,8 +4,7 @@
 2. [pm2 사용하기](#pm2-사용하기)
 3. [winston 사용하기](#winston-사용하기)
 4. [redis에 세션 저장하기](#redis에-세션-저장하기)
-5. [Git 와 GitHub 사용하기](#git-와-github-사용하기)
-6. [AWS에 배포하기](#aws에-배포하기)
+5. [AWS에 배포하기](#aws에-배포하기)
 
 ---
 
@@ -169,6 +168,8 @@ app.post('/form', csrfProtection, (req, res) => {
     </details>
 
 ### pm2 명령어
+- pm2가 노드 프로세스를 백그라운드로 돌리므로 콘솔에 다른 명령어 입력 가능
+
 | 명령어 | 설명 |
 |--------|------|
 | `npx pm2 start server.js` | 애플리케이션 시작 |
@@ -217,13 +218,63 @@ npx pm2 start server.js -i [프로세스 수]
 
 ## winston 사용하기
 
+- 목적: 서버 로그 관리를 위한 모듈로, `console.log`와 `console.error`를 대체함.
+- 주요 특징:
+    - 로그를 파일이나 데이터베이스에 저장하여 서버가 종료되어도 로그가 유지됨.
+    - 로그 심각도 레벨 지원: `error > warn > info > verbose > debug > silly`
+    - 다양한 형식(format) 지원: json, label, timestamp, printf, simple, combine 등
+    - 여러 저장 방식(transports) 지원: 파일, 콘솔 등
+- `winston-daily-rotate-file` 패키지를 사용하면 날짜별로 로그 관리 가능
+
+<details>
+<summary><i> localhost:8001/abc 결과 로그 기록 생성</i></summary>
+
+![Image](https://github.com/user-attachments/assets/71ecb019-e831-4d9d-bc44-851d7190ff7c)
+
+</details>
+
 ---
 
 ## redis에 세션 저장하기
 
----
+### Connect-Redis
+- 목적: 멀티 프로세스 간 세션 공유를 위해 Redis와 Express를 연결하는 패키지
+- 필요성:
+    - 기본적으로 Express 세션은 메모리에 저장되어 서버 재시작 시 모든 로그인이 풀림
+    - 메모리 누수(memory leak) 발생 및 단일 프로세스에서만 확장 가능한 한계 존재
+- 장점:
+    - 서버 재시작해도 로그인 유지
+    - Redis의 빠른 성능으로 세션 관리 효율적
+    - 서비스 업데이트 시에도 사용자 로그인 상태 유지
 
-## Git 와 GitHub 사용하기
+### pm2 사용 중에 npm 패키지 설치 실패 오류
+
+- pm2로 실행 중인 node.js 애플리케이션이 node_modules 내의 파일들을 사용중임.
+- `bindings.js` 파일이 pm2 프로세스에 의해 사용되고 있어서 npm이 해당 파일을 수정하거나 접근할 수 없음.
+- 해결: `npx pm2 kill` 이후에 다시 설치하면 잘 됨.
+<details>
+<summary><i>pm2 사용 중에 npm 패키지 설치가 실패함</i></summary>
+
+![Image](https://github.com/user-attachments/assets/c5ae6aff-3bc2-4be0-bacf-86e78a95c44e)
+
+</details>
+
+## NVM (Node Version Manager)
+- 목적: Node.js 버전을 관리하는 도구
+### Windows에서 설치:
+- `https://github.com/coreybutler/nvm-windows/releases`에서 nvm-setup.zip 다운로드
+압축 해제 후 설치 파일 실행
+- 주요 명령어:
+    - `nvm list`: 설치된 Node.js 버전 확인
+    - `nvm install [버전]`: 특정 버전 설치 (예: nvm install 18.7.0)
+    - `nvm install latest`: 최신 버전 설치
+    - `nvm use [버전]`: 특정 버전 사용
+- 기본 경로:
+    - `Windows: C:\Users[사용자명]\AppData\Roaming\nvm`
+- 특징:
+    - 여러 Node.js 버전을 쉽게 전환하며 사용 가능
+    - 프로젝트별로 다른 Node.js 버전 적용 가능
+    - Mac/Linux에서는 n 패키지를 대신 사용 가능
 
 ---
 
