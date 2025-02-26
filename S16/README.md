@@ -8,7 +8,7 @@
 
 ## 서버리스 컴퓨팅
 
-- 서버리스(Serverless)는 '서버가 없다'는 의미가 아니라, 개발자가 서버 관리에 신경 쓰지 않아도 되는 클라우드 컴픁이 모델
+- 서버리스(Serverless)는 '서버가 없다'는 의미가 아니라, 개발자가 서버 관리에 신경 쓰지 않아도 되는 클라우드 컴퓨팅 모델
 
 ### 핵심 특징
 - 서버 관리 부담 감소 : 클라우드 제공업체가 서버 인프라를 관리
@@ -38,6 +38,52 @@
 ---
 
 ## S3에 대신 파일 올리기
+
+1. AWS S3 버킷 설정
+- 고유한 이름의 버킷 생성
+- 모든 퍼블릭 액세스 차단 해제 (테스트용)
+- 버킷 정책 설정: GetObject와 PutObject 권한 부여
+
+    <details>
+    <summary><i>퍼블릭 액세스 차단 해제</i></summary>
+
+    ![Image](https://github.com/user-attachments/assets/ba1f08a3-40ae-462e-b66e-6975ae284bda)
+
+    </details>
+    <details>
+    <summary><i>버킷 정책</i></summary>
+
+    ![Image](https://github.com/user-attachments/assets/b98978cc-8a47-450e-9db1-64761a1690b4)
+
+    </details>
+
+2. 필요한 자격 증명 설정
+- AWS 액세스 키 ID와 시크릿 키 발급
+- `.env` 파일에 보안 키 저장
+
+3. 서버 코드 구현
+- 필요 패키지 설치: `multer-s3`, `@aws-sdk/client-s3`
+- S3 클라이언트 생성 및 설정
+- multer 스토리지를 multerS3로 설정
+- 파일명과 경로 설정 (original 폴더에 저장)
+
+4. 라우트 처리
+- 이미지 업로드 라우트 구현 `(POST /post/img)`
+- 업로드 완료 시 S3 이미지 URL 응답 `(req.file.location)`
+
+5. 권한 관련 문제 해결
+- 403 에러: 
+    - S3 버킷 퍼블릭 액세스와 권한 정책 확인
+    - IAM 사용자 권한 설정 확인
+    - 로그인 관련 코드, 로그인 여부 체크 (서버에서 403으로 처리중일 경우)
+
+6. 업로드 테스트
+<details>
+<summary><i>업로드 완료</i></summary>
+
+![Image](https://github.com/user-attachments/assets/f86c3263-d806-4431-96e4-2726577d1c2e)
+
+</details>
 
 ---
 
