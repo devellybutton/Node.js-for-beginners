@@ -91,6 +91,9 @@
 
 ## 람다 사용하기
 
-![Image](https://github.com/user-attachments/assets/b17f524d-978c-4c8a-ace9-1085346b5b34)
+![Image](https://github.com/user-attachments/assets/b17f524d-978c-4c8a-ace9-1085346b5b34) 
+<br>
 출처 : [Node.js교과서](https://thebook.io/080334/0562/)
+
+
 
