@@ -72,6 +72,24 @@ const func: Func = (x) => x.toString()
 ---
 
 ## 타입스크립트 추가 문법 + 노드 타이핑하기
+- 윈도우 : vscode에서 `f12` 누르면 타입 정의 파일로 이동
+
+### 제네릭 타입
+- 출처 : `node_modules/typescript/lib/lib.es5.d.ts`
+```
+interface Promise<T> {
+    then<TResult1 = T, TResult2 = never>(
+        onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+        onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+    ): Promise<TResult1 | TResult2>;
+    // 기타 메서드...
+}
+```
+- `Promise<Buffer>`와 같은 형태는 제네릭 타입 매개변수 T에 Buffer 타입을 지정한 것
+- Promise가 resolve 될 때 Buffer 타입의 값을 반환한다는 의미
+    - fs.readFile을 Promise 방식으로 사용할 때 `Promise<Buffer>`를 반환하는 것
+- 일반적으로 interface Promise<Buffer>와 같이 특정 타입에 대한 Promise 인터페이스를 직접 재정의하지는 않음. 
+    - 대신 기존 Promise 인터페이스를 제네릭 타입 매개변수를 통해 사용함.
 
 ---
 
