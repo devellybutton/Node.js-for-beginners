@@ -1,2 +1,2 @@
 let a = 'hello';
-a = 123;
+a = 'string';

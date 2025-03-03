@@ -73,6 +73,7 @@ const func: Func = (x) => x.toString()
 
 ## 타입스크립트 추가 문법 + 노드 타이핑하기
 - 윈도우 : vscode에서 `f12` 누르면 타입 정의 파일로 이동
+- 노드 타입 설치 : `npm i -D @types/node`
 
 ### 제네릭 타입
 - 출처 : `node_modules/typescript/lib/lib.es5.d.ts`
@@ -95,9 +96,25 @@ interface Promise<T> {
 
 ## 커뮤니티 타입 정의 적용하기
 
+<details>
+<summary><i>타입정의 파일이 없어서 에러나는 상황</i></summary>
+
+![Image](https://github.com/user-attachments/assets/decc6f43-28f8-4136-b69c-85121ea4bf49)
+
+</details>
+
+```
+npm install --save-dev @types/express @types/cookie-parser @types/morgan @types/express-session @types/nunjucks @types/passport
+```
+
 ---
 
 ## 라이브러리 코드 타이핑하기
+
+### npm 패키지
+- `TS` : 패키지 안에 ts가 들어 있음.
+- `DT` : 패키지 안에 ts가 없어서 사람들이 타입을 정의해놓음.
+- 둘 다 없음 : 타입을 직접 만들어야 함.
 
 ---
 
